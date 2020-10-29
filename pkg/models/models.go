@@ -14,7 +14,7 @@ type Pkg struct {
 	// RepoBranch is which branch is used for updates
 	RepoBranch string
 	// KeepLastN determines how many old versions of packages are kept
-	KeepLastN int			`json:"keep_last_n,omitempty"`
+	KeepLastN int
 	// LastHash is the latest SHA1 retrieved from the package repo
 	LastHash plumbing.Hash
 	// UpdateFrequency determines how often the package should be updated
