@@ -88,7 +88,7 @@ func (b *Badger) AllPackages() (pkgs []*models.Pkg, err error) {
 }
 
 func (b *Badger) AllPackageNames() (names []string, _ error) {
-	return b.allKeysWithPrefix(pkgPrefix)
+	return b.allKeysWithPrefix([]byte(pkgPrefix))
 }
 
 func (b *Badger) GetUser(name string) (user *models.User, err error) {
@@ -129,10 +129,10 @@ func (b *Badger) DelUser(user *models.User) error {
 }
 
 func (b *Badger) AllUserNames() (users []string, _ error) {
-	return b.allKeysWithPrefix(userPrefix)
+	return b.allKeysWithPrefix([]byte(userPrefix))
 }
 
-func (b *Badger) allKeysWithPrefix(prefix string) (names []string, _ error) {
+func (b *Badger) allKeysWithPrefix(prefix []byte) (names []string, _ error) {
 	return names, b.db.View(func(txn *badger.Txn) error {
 		opts := badger.DefaultIteratorOptions
 		opts.PrefetchValues = false
@@ -140,7 +140,6 @@ func (b *Badger) allKeysWithPrefix(prefix string) (names []string, _ error) {
 		it := txn.NewIterator(opts)
 		defer it.Close()
 
-		prefix := []byte(prefix)
 
 		for it.Seek(prefix); it.ValidForPrefix(prefix); it.Next() {
 			item := it.Item()
