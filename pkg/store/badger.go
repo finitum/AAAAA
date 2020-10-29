@@ -26,7 +26,7 @@ func OpenBadgerStore(path string) (*Badger, error) {
 	}, nil
 }
 
-func (b Badger) GetPackage(name string) (*models.Pkg, error) {
+func (b *Badger) GetPackage(name string) (*models.Pkg, error) {
 	var pkg *models.Pkg
 
 	return pkg, b.db.View(func(txn *badger.Txn) error {
@@ -44,7 +44,7 @@ func (b Badger) GetPackage(name string) (*models.Pkg, error) {
 	})
 }
 
-func (b Badger) AddPackage(pkg *models.Pkg) error {
+func (b *Badger) AddPackage(pkg *models.Pkg) error {
 	return b.db.Update(func(txn *badger.Txn) error {
 		var value bytes.Buffer
 
@@ -58,15 +58,13 @@ func (b Badger) AddPackage(pkg *models.Pkg) error {
 	})
 }
 
-func (b Badger) DelPackage(pkg *models.Pkg) error {
+func (b *Badger) DelPackage(pkg *models.Pkg) error {
 	return b.db.Update(func(txn *badger.Txn) error {
 		return errors.Wrap(txn.Delete([]byte(pkgPrefix+pkg.Name)), "badger transaction")
 	})
 }
 
-func (b Badger) AllPackages() ([]*models.Pkg, error) {
-	pkgs := make([]*models.Pkg, 0)
-
+func (b *Badger) AllPackages() (pkgs []*models.Pkg, err error) {
 	return pkgs, b.db.View(func(txn *badger.Txn) error {
 		it := txn.NewIterator(badger.DefaultIteratorOptions)
 		defer it.Close()
@@ -89,7 +87,7 @@ func (b Badger) AllPackages() ([]*models.Pkg, error) {
 	})
 }
 
-func (b Badger) AllPackageNames() ([]string, error) {
+func (b *Badger) AllPackageNames() ([]string, error) {
 	pkgs, err := b.AllPackages()
 	if err != nil {
 		return nil, errors.Wrap(err, "all packages")
@@ -101,7 +99,7 @@ func (b Badger) AllPackageNames() ([]string, error) {
 	return pkgNames, nil
 }
 
-func (b Badger) GetUser(name string) (user *models.User, err error) {
+func (b *Badger) GetUser(name string) (user *models.User, err error) {
 	err = b.db.View(func(txn *badger.Txn) error {
 		item, err := txn.Get([]byte(userPrefix + name))
 		if err != nil {
@@ -118,7 +116,7 @@ func (b Badger) GetUser(name string) (user *models.User, err error) {
 	return
 }
 
-func (b Badger) AddUser(user *models.User) error {
+func (b *Badger) AddUser(user *models.User) error {
 	return b.db.Update(func(txn *badger.Txn) error {
 		var value bytes.Buffer
 
@@ -132,7 +130,7 @@ func (b Badger) AddUser(user *models.User) error {
 	})
 }
 
-func (b Badger) DelUser(user *models.User) error {
+func (b *Badger) DelUser(user *models.User) error {
 	return b.db.Update(func(txn *badger.Txn) error {
 		return errors.Wrap(txn.Delete([]byte(userPrefix+user.Username)), "badger transaction")
 	})
