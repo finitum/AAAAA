@@ -12,8 +12,8 @@ type PackageStore interface {
 
 type UserStore interface {
 	GetUser(name string) (*models.User, error)
-	AddUser(user models.User) error
-	DelUser(user models.User) error
+	AddUser(user *models.User) error
+	DelUser(user *models.User) error
 }
 
 type Store interface {
