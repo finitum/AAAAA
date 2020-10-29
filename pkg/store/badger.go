@@ -87,16 +87,8 @@ func (b *Badger) AllPackages() (pkgs []*models.Pkg, err error) {
 	})
 }
 
-func (b *Badger) AllPackageNames() ([]string, error) {
-	pkgs, err := b.AllPackages()
-	if err != nil {
-		return nil, errors.Wrap(err, "all packages")
-	}
-	var pkgNames []string
-	for _, v := range pkgs {
-		pkgNames = append(pkgNames, v.Name)
-	}
-	return pkgNames, nil
+func (b *Badger) AllPackageNames() (names []string, _ error) {
+	return b.allKeysWithPrefix(pkgPrefix)
 }
 
 func (b *Badger) GetUser(name string) (user *models.User, err error) {
@@ -133,5 +125,30 @@ func (b *Badger) AddUser(user *models.User) error {
 func (b *Badger) DelUser(user *models.User) error {
 	return b.db.Update(func(txn *badger.Txn) error {
 		return errors.Wrap(txn.Delete([]byte(userPrefix+user.Username)), "badger transaction")
+	})
+}
+
+func (b *Badger) AllUserNames() (users []string, _ error) {
+	return b.allKeysWithPrefix(userPrefix)
+}
+
+func (b *Badger) allKeysWithPrefix(prefix string) (names []string, _ error) {
+	return names, b.db.View(func(txn *badger.Txn) error {
+		opts := badger.DefaultIteratorOptions
+		opts.PrefetchValues = false
+
+		it := txn.NewIterator(opts)
+		defer it.Close()
+
+		prefix := []byte(prefix)
+
+		for it.Seek(prefix); it.ValidForPrefix(prefix); it.Next() {
+			item := it.Item()
+			k := item.Key()
+
+			names = append(names, string(k[len(prefix):]))
+		}
+
+		return errors.Wrap(nil, "wait what")
 	})
 }

@@ -14,6 +14,7 @@ type UserStore interface {
 	GetUser(name string) (*models.User, error)
 	AddUser(user *models.User) error
 	DelUser(user *models.User) error
+	AllUserNames() ([]string, error)
 }
 
 type Store interface {

@@ -66,12 +66,15 @@ func TestBadger_AllPackages(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Len(t, pkgs, 2)
 
+	assert.Contains(t, pkgs, &tstPkg, &tstPkg2)
+
 	pkgNames, err := store.AllPackageNames()
 	assert.NoError(t, err)
 	assert.Len(t, pkgNames, 2)
 
-	assert.NoError(t, os.RemoveAll(storePath))
+	assert.Contains(t, pkgNames, tstPkg.Name, tstPkg2.Name)
 
+	assert.NoError(t, os.RemoveAll(storePath))
 }
 
 func TestBadger_AddGetDelUser(t *testing.T) {
@@ -93,6 +96,32 @@ func TestBadger_AddGetDelUser(t *testing.T) {
 	assert.Equal(t, &tstUser, res)
 
 	assert.NoError(t, store.DelUser(&tstUser))
+
+	assert.NoError(t, os.RemoveAll(storePath))
+}
+
+func TestBadger_AllUserNames(t *testing.T) {
+	tstUser := models.User{
+		Username: "yoink",
+		Password: "rot26bestencryption",
+	}
+	tstUser2 := models.User{
+		Username: "; DROP TABLE 'USERS';--",
+		Password: "2xrot13bestencryption",
+	}
+
+	storePath := os.TempDir() + "/TestBadger_AllUserNames"
+	store, err := OpenBadgerStore(storePath)
+	assert.NoError(t, err)
+
+	assert.NoError(t, store.AddUser(&tstUser))
+	assert.NoError(t, store.AddUser(&tstUser2))
+
+	names, err := store.AllUserNames()
+	assert.NoError(t, err)
+	assert.Len(t, names, 2)
+
+	assert.Contains(t, names, tstUser.Username, tstUser2.Username)
 
 	assert.NoError(t, os.RemoveAll(storePath))
 }
