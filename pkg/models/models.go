@@ -50,3 +50,11 @@ type User struct {
 	Username string
 	Password string
 }
+
+func (u *User) Bind(*http.Request) error {
+	if u.Username == "" || u.Password == "" {
+		return errors.New("invalid user")
+	}
+
+	return nil
+}

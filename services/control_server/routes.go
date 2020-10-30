@@ -4,19 +4,22 @@ import (
 	"github.com/finitum/AAAAA/pkg/git"
 	"github.com/finitum/AAAAA/pkg/models"
 	"github.com/finitum/AAAAA/pkg/store"
+	"github.com/go-chi/jwtauth"
 	"github.com/go-chi/render"
 	"net/http"
 )
 
 type Routes struct {
-	db store.Store
+	db        store.Store
+	tokenAuth *jwtauth.JWTAuth
 }
 
-func NewRoutes(db store.Store) *Routes {
-	return &Routes{db}
+func NewRoutes(db store.Store, auth *jwtauth.JWTAuth) *Routes {
+	return &Routes{db, auth}
 }
 
 type AppCode int64
+
 const (
 	AppCodeGeneric AppCode = iota
 	AppCodeGitRepoUnreachable
@@ -46,7 +49,7 @@ func ErrInvalidRequest(err error, code ...AppCode) render.Renderer {
 		Err:            err,
 		HTTPStatusCode: http.StatusBadRequest,
 		StatusText:     "Invalid Request",
-		AppCode: 		retcode,
+		AppCode:        retcode,
 		ErrorText:      err.Error(),
 	}
 }
