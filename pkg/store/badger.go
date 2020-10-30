@@ -140,7 +140,6 @@ func (b *Badger) allKeysWithPrefix(prefix []byte) (names []string, _ error) {
 		it := txn.NewIterator(opts)
 		defer it.Close()
 
-
 		for it.Seek(prefix); it.ValidForPrefix(prefix); it.Next() {
 			item := it.Item()
 			k := item.Key()
