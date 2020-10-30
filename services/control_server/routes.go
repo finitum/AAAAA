@@ -1,11 +1,13 @@
 package main
 
 import (
+	"github.com/dgrijalva/jwt-go"
 	"github.com/finitum/AAAAA/pkg/git"
 	"github.com/finitum/AAAAA/pkg/models"
 	"github.com/finitum/AAAAA/pkg/store"
 	"github.com/go-chi/jwtauth"
 	"github.com/go-chi/render"
+	"golang.org/x/crypto/bcrypt"
 	"net/http"
 )
 
@@ -18,53 +20,36 @@ func NewRoutes(db store.Store, auth *jwtauth.JWTAuth) *Routes {
 	return &Routes{db, auth}
 }
 
-type AppCode int64
-
-const (
-	AppCodeGeneric AppCode = iota
-	AppCodeGitRepoUnreachable
-)
-
-type ErrResponse struct {
-	Err            error `json:"-"` // low-level runtime error
-	HTTPStatusCode int   `json:"-"` // http response status code
-
-	StatusText string  `json:"status"`          // user-level status message
-	AppCode    AppCode `json:"code,omitempty"`  // application-specific error code
-	ErrorText  string  `json:"error,omitempty"` // application-level error message, for debugging
-}
-
-func (e *ErrResponse) Render(_ http.ResponseWriter, r *http.Request) error {
-	render.Status(r, e.HTTPStatusCode)
-	return nil
-}
-
-func ErrInvalidRequest(err error, code ...AppCode) render.Renderer {
-	retcode := AppCodeGeneric
-	if len(code) > 0 {
-		retcode = code[0]
-	}
-
-	return &ErrResponse{
-		Err:            err,
-		HTTPStatusCode: http.StatusBadRequest,
-		StatusText:     "Invalid Request",
-		AppCode:        retcode,
-		ErrorText:      err.Error(),
-	}
-}
-
-func ErrServerError(err error) render.Renderer {
-	return &ErrResponse{
-		Err:            err,
-		HTTPStatusCode: http.StatusInternalServerError,
-		StatusText:     "Server Error",
-		ErrorText:      err.Error(),
-	}
-}
-
 func (*Routes) HelloWorld(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write([]byte("Hello World!"))
+}
+
+func (rs *Routes) Login(w http.ResponseWriter, r *http.Request) {
+	var user models.User
+
+	if err := render.Bind(r, &user); err != nil {
+		_ = render.Render(w, r, ErrInvalidRequest(err))
+		return
+	}
+
+	dbUser, err := rs.db.GetUser(user.Username)
+	if err != nil {
+		_ = render.Render(w, r, ErrUnauthorized())
+		return
+	}
+
+	if err := bcrypt.CompareHashAndPassword([]byte(dbUser.Password), []byte(user.Password)); err != nil {
+		_ = render.Render(w, r, ErrUnauthorized())
+		return
+	}
+
+	_, tokenString, err := rs.tokenAuth.Encode(jwt.MapClaims{"username": dbUser.Username})
+	if err != nil {
+		_ = render.Render(w, r, ErrServerError(err))
+		return
+	}
+
+	w.Header().Set("Authorization", "Bearer "+tokenString)
 }
 
 // POST - /package
@@ -77,7 +62,11 @@ func (rs *Routes) AddPackage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// TODO: existence check?
+	_, err := rs.db.GetPackage(pkg.Name)
+	if err == store.ErrNotExists {
+		_ = render.Render(w, r, ErrExists())
+		return
+	}
 
 	// Check if we are able to ls-remote the repo
 	if _, err := git.LatestHash(pkg.RepoURL, pkg.RepoBranch); err != nil {

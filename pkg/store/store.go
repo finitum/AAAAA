@@ -1,8 +1,14 @@
 package store
 
-import "github.com/finitum/AAAAA/pkg/models"
+import (
+	"errors"
+	"github.com/finitum/AAAAA/pkg/models"
+)
+
+var ErrNotExists = errors.New("entry does not exist")
 
 type PackageStore interface {
+	// GetPackage gets a package definition from the store MUST return ErrNotExists if the package does not exist
 	GetPackage(name string) (*models.Pkg, error)
 	AddPackage(pkg *models.Pkg) error
 	DelPackage(pkg *models.Pkg) error

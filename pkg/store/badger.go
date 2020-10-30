@@ -31,7 +31,9 @@ func (b *Badger) GetPackage(name string) (*models.Pkg, error) {
 
 	return pkg, b.db.View(func(txn *badger.Txn) error {
 		item, err := txn.Get([]byte(pkgPrefix + name))
-		if err != nil {
+		if err == badger.ErrKeyNotFound {
+			return ErrNotExists
+		} else if err != nil {
 			return errors.Wrap(err, "badger get")
 		}
 
@@ -139,7 +141,6 @@ func (b *Badger) allKeysWithPrefix(prefix []byte) (names []string, _ error) {
 
 		it := txn.NewIterator(opts)
 		defer it.Close()
-
 
 		for it.Seek(prefix); it.ValidForPrefix(prefix); it.Next() {
 			item := it.Item()
