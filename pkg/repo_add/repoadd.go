@@ -102,6 +102,7 @@ func serializeAddOptions(options RepoAddOptions) []string {
 	return res
 }
 
+// AddPackage is a wrapper around the repo-add command.
 func (r *RepoAdd) AddPackage(packagepath string, options RepoAddOptions) error {
 	so := serializeAddOptions(options)
 
@@ -126,6 +127,7 @@ func (r *RepoAdd) AddPackage(packagepath string, options RepoAddOptions) error {
 	return nil
 }
 
+// RemovePackage is a wrapper around the repo-add command.
 func (r *RepoAdd) RemovePackage(packagepath string, options CommonOptions) error {
 	so := serializeCommonOptions(options)
 
