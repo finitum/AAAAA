@@ -1,7 +1,9 @@
 package models
 
 import (
+	"errors"
 	"github.com/go-git/go-git/v5/plumbing"
+	"net/http"
 	"time"
 )
 
@@ -23,11 +25,25 @@ type Pkg struct {
 	// TODO: Version?
 }
 
-func DefaultPkg() Pkg {
-	return Pkg{
-		KeepLastN:       2,
-		UpdateFrequency: time.Hour,
+// Bind will run after unmarshalling a Pkg, good place to do post-processing
+func (p *Pkg) Bind(*http.Request) error {
+	if p.Name == "" || p.RepoURL == "" {
+		return errors.New("package is missing required fields Name and/or RepoURL")
 	}
+
+	if p.RepoBranch == "" {
+		p.RepoBranch = "master"
+	}
+
+	if p.KeepLastN == 0 {
+		p.KeepLastN = 2
+	}
+
+	if p.UpdateFrequency == 0 {
+		p.UpdateFrequency = time.Hour
+	}
+
+	return nil
 }
 
 type User struct {
