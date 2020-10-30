@@ -25,6 +25,11 @@ type Pkg struct {
 	// TODO: Version?
 }
 
+// Render will run before marshalling a Pkg, good place to do pre-processing
+func (p *Pkg) Render(http.ResponseWriter, *http.Request) error {
+	return nil
+}
+
 // Bind will run after unmarshalling a Pkg, good place to do post-processing
 func (p *Pkg) Bind(*http.Request) error {
 	if p.Name == "" || p.RepoURL == "" {

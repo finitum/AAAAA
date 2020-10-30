@@ -4,14 +4,15 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"github.com/dgrijalva/jwt-go"
+	"github.com/finitum/AAAAA/pkg/auth"
 	"github.com/finitum/AAAAA/pkg/models"
 	"github.com/finitum/AAAAA/pkg/store"
+	"github.com/finitum/AAAAA/services/control_server/routes"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/jwtauth"
 	"github.com/go-chi/render"
 	log "github.com/sirupsen/logrus"
-	"golang.org/x/crypto/bcrypt"
 	"net/http"
 	"os"
 )
@@ -23,13 +24,16 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// Create initial user
-	initialUser(db)
-
 	tokenAuth := jwtauth.New(jwt.SigningMethodHS384.Name, []byte("change me"), nil)
 
+	// Auth service
+	auths := auth.NewStoreAuth(db, tokenAuth)
+
+	// Create initial user
+	initialUser(db, auths)
+
 	// Router
-	rs := NewRoutes(db, tokenAuth)
+	rs := routes.New(db, auths)
 
 	r := chi.NewRouter()
 	r.Use(middleware.StripSlashes)
@@ -51,12 +55,14 @@ func main() {
 		// Handle valid / invalid tokens.
 		r.Use(jwtauth.Authenticator)
 
+		r.Post("/user", rs.AddUser)
+		r.Post("/package", rs.AddPackage)
 	})
 
 	log.Fatal(http.ListenAndServe(":5000", r))
 }
 
-func initialUser(db store.Store) {
+func initialUser(db store.Store, auths auth.AuthenticationService) {
 	users, err := db.AllUserNames()
 	if err != nil {
 		log.Fatal(err)
@@ -73,19 +79,12 @@ func initialUser(db store.Store) {
 	}
 	pass := base64.StdEncoding.EncodeToString(buf)
 
-	hashedPass, err := bcrypt.GenerateFromPassword([]byte(pass), bcrypt.DefaultCost)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	user := models.User{
+	if err := auths.Register(&models.User{
 		Username: "admin",
-		Password: string(hashedPass),
-	}
-
-	if err := db.AddUser(&user); err != nil {
+		Password: pass,
+	}); err != nil {
 		log.Fatal(err)
 	}
 
-	log.Infof(" username: admin, password: %s \n", pass)
+	log.Infof( "|> username: admin, password: %s \n", pass)
 }

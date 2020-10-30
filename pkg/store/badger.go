@@ -73,14 +73,14 @@ func (b *Badger) AllPackages() (pkgs []*models.Pkg, err error) {
 		prefix := []byte(pkgPrefix)
 		for it.Seek(prefix); it.ValidForPrefix(prefix); it.Next() {
 			item := it.Item()
-			var pkg *models.Pkg
+			var pkg models.Pkg
 			err := item.Value(func(val []byte) error {
 				buf := bytes.NewBuffer(val)
 
 				dec := gob.NewDecoder(buf)
 				return errors.Wrap(dec.Decode(&pkg), "gob decode")
 			})
-			pkgs = append(pkgs, pkg)
+			pkgs = append(pkgs, &pkg)
 			if err != nil {
 				return errors.Wrap(err, "badger iteration")
 			}
@@ -96,7 +96,9 @@ func (b *Badger) AllPackageNames() (names []string, _ error) {
 func (b *Badger) GetUser(name string) (user *models.User, err error) {
 	err = b.db.View(func(txn *badger.Txn) error {
 		item, err := txn.Get([]byte(userPrefix + name))
-		if err != nil {
+		if err == badger.ErrKeyNotFound {
+			return ErrNotExists
+		} else if err != nil {
 			return errors.Wrap(err, "badger get")
 		}
 
