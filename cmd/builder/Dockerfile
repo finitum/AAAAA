@@ -1,4 +1,4 @@
-FROM golang:1.15
+FROM golang:1.15 as build
 
 WORKDIR /build
 
@@ -11,6 +11,16 @@ RUN go mod download
 
 # Build
 COPY . .
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o builder /build/services/builder
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o builder /build/cmd/builder
 
 FROM archlinux
+
+RUN useradd -m -G wheel runner
+
+RUN echo 'runner ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/yeet
+
+CMD ["/usr/bin/builder"]
+
+COPY --from=builder /build/builder /usr/bin/builder
+
+RUN pacman -Syu --noconfirm base-devel
