@@ -1,7 +1,6 @@
 package repo_add
 
 import (
-	"fmt"
 	"github.com/stretchr/testify/assert"
 	"os"
 	"os/exec"
@@ -14,13 +13,12 @@ func TestNewRepoAdd(t *testing.T) {
 	// If NewRepoAdd fails, the tests don't run on an arch system.
 	// By returning the test just passes on non Archlinux systems
 	if err != nil {
-		fmt.Printf("Not running on an archlinux system, marking test as passed.")
-		return
+		t.Skip("Not running on an archlinux system, marking test as passed.")
 	}
 }
 
 func TestIntegration(t *testing.T) {
-	dir := os.TempDir() + "/TestIntegration"
+	dir := os.TempDir() + "/AAAAA_TestIntegration"
 	dbpath := dir + "/test.db.tar.gz"
 	pkgbuildpath := dir + "/PKGBUILD"
 
@@ -29,8 +27,7 @@ func TestIntegration(t *testing.T) {
 	// If NewRepoAdd fails, the tests don't run on an arch system.
 	// By returning the test just passes on non Archlinux systems
 	if err != nil {
-		fmt.Printf("Not running on an archlinux system, marking test as passed.")
-		return
+		t.Skip("Not running on an archlinux system, marking test as passed.")
 	}
 
 	// create tempdir to run in

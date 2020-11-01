@@ -121,7 +121,7 @@ func (r *RepoAdd) AddPackage(packagepath string, options RepoAddOptions) error {
 	}
 
 	if !cmd.ProcessState.Success() {
-		return fmt.Errorf("running repo-add failed: %d", cmd.ProcessState.ExitCode())
+		return fmt.Errorf("running repo-add failed (%d)", cmd.ProcessState.ExitCode())
 	}
 
 	return nil
