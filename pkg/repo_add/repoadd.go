@@ -5,6 +5,7 @@ package repo_add
 import (
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"os/exec"
 )
@@ -111,17 +112,15 @@ func (r *RepoAdd) AddPackage(packagepath string, options RepoAddOptions) error {
 
 	cmd := exec.Command(repoAddCommand, so...)
 	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-
-	println(cmd.String())
-
-	err := cmd.Run()
+	pipe, err := cmd.StderrPipe()
 	if err != nil {
 		return err
 	}
 
-	if !cmd.ProcessState.Success() {
-		return fmt.Errorf("running repo-add failed (%d)", cmd.ProcessState.ExitCode())
+	err = cmd.Run()
+	if err != nil {
+		res, _ := ioutil.ReadAll(pipe)
+		return fmt.Errorf("running repo-add failed (%d) (%v) (stderr=%v)", cmd.ProcessState.ExitCode(), err, res)
 	}
 
 	return nil
@@ -137,14 +136,16 @@ func (r *RepoAdd) RemovePackage(packagepath string, options CommonOptions) error
 	cmd := exec.Command(repoAddCommand, so...)
 	cmd.Args[0] = repoRemoveCommand
 
-	err := cmd.Run()
+	cmd.Stdout = os.Stdout
+	pipe, err := cmd.StderrPipe()
 	if err != nil {
 		return err
 	}
 
-	if !cmd.ProcessState.Success() {
-		return errors.New("running repo-remove failed")
+	err = cmd.Run()
+	if err != nil {
+		res, _ := ioutil.ReadAll(pipe)
+		return fmt.Errorf("running repo-remove failed (%d) (%v) (stderr=%v)", cmd.ProcessState.ExitCode(), err, res)
 	}
-
 	return nil
 }

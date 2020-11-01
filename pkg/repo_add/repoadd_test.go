@@ -13,7 +13,7 @@ func TestNewRepoAdd(t *testing.T) {
 	// If NewRepoAdd fails, the tests don't run on an arch system.
 	// By returning the test just passes on non Archlinux systems
 	if err != nil {
-		t.Skip("Not running on an archlinux system, marking test as passed.")
+		t.Skip("Not running on an archlinux system, skipping.")
 	}
 }
 
@@ -27,7 +27,7 @@ func TestIntegration(t *testing.T) {
 	// If NewRepoAdd fails, the tests don't run on an arch system.
 	// By returning the test just passes on non Archlinux systems
 	if err != nil {
-		t.Skip("Not running on an archlinux system, marking test as passed.")
+		t.Skip("Not running on an archlinux system, skipping.")
 	}
 
 	// create tempdir to run in
