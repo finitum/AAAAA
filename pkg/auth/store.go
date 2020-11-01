@@ -28,7 +28,7 @@ func (s *StoreAuth) Login(user *models.User) (string, error) {
 		return "", errors.Wrap(err, "password wrong or invalid")
 	}
 
-	_, tokenString, err := s.jwt.Encode(jwt.MapClaims{"username": dbUser.Username})
+	_, tokenString, err := s.jwt.Encode(jwt.StandardClaims{Subject: dbUser.Username, Audience: "user"})
 	if err != nil {
 		return "", errors.Wrap(err, "couldn't encode jwt token")
 

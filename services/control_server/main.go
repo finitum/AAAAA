@@ -46,6 +46,7 @@ func main() {
 	r.Get("/", rs.HelloWorld)
 
 	r.Post("/login", rs.Login)
+	r.Get("/package", rs.GetPackages)
 
 	// Protected Routes
 	r.Group(func(r chi.Router) {
@@ -57,6 +58,8 @@ func main() {
 
 		r.Post("/user", rs.AddUser)
 		r.Post("/package", rs.AddPackage)
+
+		r.Post("/package/{pkg}", rs.UploadPackage)
 	})
 
 	log.Fatal(http.ListenAndServe(":5000", r))

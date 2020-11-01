@@ -89,7 +89,7 @@ func serializeCommonOptions(options CommonOptions) []string {
 	return res
 }
 
-func serializeAddOptions(options RepoAddOptions) []string {
+func serializeAddOptions(options *RepoAddOptions) []string {
 	res := serializeCommonOptions(options.CommonOptions)
 
 	if options.OnlyNew {
@@ -104,7 +104,7 @@ func serializeAddOptions(options RepoAddOptions) []string {
 }
 
 // AddPackage is a wrapper around the repo-add command.
-func (r *RepoAdd) AddPackage(packagepath string, options RepoAddOptions) error {
+func (r *RepoAdd) AddPackage(packagepath string, options *RepoAddOptions) error {
 	so := serializeAddOptions(options)
 
 	so = append(so, r.dbpath)

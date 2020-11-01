@@ -37,3 +37,21 @@ func LatestHash(url, branch string) (plumbing.Hash, error) {
 
 	return foundRef.Hash(), nil
 }
+
+func Clone(path, url, branch string) (*git.Repository, error) {
+	refName := plumbing.NewBranchReferenceName(branch)
+
+	repo, err := git.PlainClone(path, false, &git.CloneOptions{
+		URL:               url,
+		RemoteName:        "origin",
+		ReferenceName:     refName,
+		SingleBranch:      true,
+		Depth:             1,
+		RecurseSubmodules: 1,
+	})
+	if err != nil {
+		return nil, errors.Wrap(err, "git clone")
+	}
+
+	return repo, nil
+}
