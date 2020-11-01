@@ -1,3 +1,4 @@
+ARG IMAGE=archlinux
 FROM golang:1.15 as builder
 
 WORKDIR /build
@@ -13,13 +14,13 @@ RUN go mod download
 COPY . .
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o builder /build/cmd/builder
 
-FROM archlinux
+FROM $IMAGE
 
-RUN useradd -m -G wheel runner
+RUN useradd -m -G wheel runner || true
 
 WORKDIR /home/runner
 
-RUN echo 'runner ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/yeet
+RUN mkdir -p /etc/sudoers.d && chmod 750 /etc/sudoers.d && echo 'runner ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/yeet
 
 CMD ["/usr/bin/builder"]
 
