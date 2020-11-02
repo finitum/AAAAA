@@ -1,12 +1,18 @@
 <template>
-  <div id="nav">
-    <router-link to="/">Home</router-link> |
-    <router-link to="/about">About</router-link>
-  </div>
-  <router-view />
+  <Header />
 </template>
 
-<style lang="scss">
+<script lang="ts">
+import { defineComponent } from "vue";
+import Header from "@/components/Header.vue";
+
+export default defineComponent({
+  name: "App",
+  components: { Header }
+});
+</script>
+
+<style>
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
