@@ -31,7 +31,7 @@ func main() {
 
 	log.Println("Cloning repo...")
 	// Git clone pkg.RepoURL --depth=1
-	repo, err := git.Clone(dir, cfg.Package.RepoURL, cfg.Package.RepoBranch);
+	repo, err := git.Clone(dir, cfg.Package.RepoURL, cfg.Package.RepoBranch)
 	if err != nil {
 		log.Fatalf("Couldn't clone PGKBUILD repo %v", err)
 	}
@@ -87,7 +87,7 @@ func UploadPackage(cfg executor.Config, srcinfo *makepkg.SrcInfo, filename, hash
 		log.Fatalf("Couldn't open package file %v", err)
 	}
 
-	req, err := http.NewRequest(http.MethodPost, cfg.UploadURL + "/" + srcinfo.PackageName, file)
+	req, err := http.NewRequest(http.MethodPost, cfg.UploadURL+"/"+srcinfo.PackageName, file)
 	if err != nil {
 		log.Fatal("yikes2")
 	}
@@ -100,7 +100,7 @@ func UploadPackage(cfg executor.Config, srcinfo *makepkg.SrcInfo, filename, hash
 
 	req.URL.RawQuery = q.Encode()
 
-	req.Header.Set("Authorization", "Bearer " + cfg.Token)
+	req.Header.Set("Authorization", "Bearer "+cfg.Token)
 	req.Header.Set("Content-Type", "application/octet-stream")
 
 	log.Printf("Upload URL: %s\n", req.URL.String())

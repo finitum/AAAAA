@@ -88,7 +88,7 @@ func (rs *Routes) TriggerBuild(w http.ResponseWriter, r *http.Request) {
 		if err := rs.exec.BuildPackage(ctx, &executor.Config{
 			Package:   pkg,
 			Token:     tokenStr,
-			UploadURL:   "http://192.168.0.150:5000/package",
+			UploadURL: "http://192.168.0.150:5000/package",
 		}); err != nil {
 			log.Warnf("trigger build %v", err)
 			return
@@ -145,7 +145,7 @@ func (rs *Routes) UploadPackage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// repo-add
+	// TODO: fix
 	ra, err := repo_add.NewRepoAdd("./AAAAA")
 	if err != nil {
 		_ = render.Render(w, r, ErrServerError(err))

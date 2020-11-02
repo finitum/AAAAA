@@ -12,10 +12,10 @@ import (
 )
 
 type DockerExecutor struct {
-	cli *client.Client
+	cli         *client.Client
 	runnerImage string
 
-	runningContainers map[string]string
+	runningContainers     map[string]string
 	runningContainersLock sync.Mutex
 }
 
@@ -48,15 +48,15 @@ func (d *DockerExecutor) BuildPackage(ctx context.Context, cfg *Config) error {
 	}
 
 	resp, err := d.cli.ContainerCreate(ctx, &container.Config{
-		Image: d.runnerImage,
-		Tty: true,
+		Image:        d.runnerImage,
+		Tty:          true,
 		AttachStdout: true,
 		Env: []string{
 			"CONFIG=" + string(cfgb),
 		},
 	}, &container.HostConfig{
-		AutoRemove:      true,
-	}, nil, "AAAAA-" + cfg.Package.Name)
+		AutoRemove: true,
+	}, nil, "AAAAA-"+cfg.Package.Name)
 	if err != nil {
 		return errors.Wrap(err, "docker container create")
 	}
@@ -79,7 +79,7 @@ func (d *DockerExecutor) BuildPackage(ctx context.Context, cfg *Config) error {
 		// TODO: Check status
 
 		d.runningContainersLock.Lock()
-		delete(d.runningContainers,cfg.Package.Name)
+		delete(d.runningContainers, cfg.Package.Name)
 		d.runningContainersLock.Unlock()
 	}()
 

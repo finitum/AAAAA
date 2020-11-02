@@ -3,12 +3,12 @@ package makepkg
 import "strings"
 
 type SrcInfo struct {
-	PackageName string
+	PackageName        string
 	PackageDescription string
-	PackageVersion string
-	PackageRelease string
-	MakeDependencies []string
-	Dependencies []string
+	PackageVersion     string
+	PackageRelease     string
+	MakeDependencies   []string
+	Dependencies       []string
 
 	OtherFields map[string][]string
 }
@@ -41,11 +41,11 @@ func ParseSrcInfo(srcinfo string) *SrcInfo {
 		case "pkgrel":
 			info.PackageRelease = parts[1]
 		case "makedepends":
-			info.MakeDependencies = append(info.MakeDependencies,parts[1])
+			info.MakeDependencies = append(info.MakeDependencies, parts[1])
 		case "depends":
-			info.Dependencies = append(info.Dependencies,parts[1])
+			info.Dependencies = append(info.Dependencies, parts[1])
 		default:
-			info.OtherFields[parts[0]] = append(info.OtherFields[parts[0]],parts[1])
+			info.OtherFields[parts[0]] = append(info.OtherFields[parts[0]], parts[1])
 		}
 	}
 

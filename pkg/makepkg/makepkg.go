@@ -14,8 +14,8 @@ func Build() error {
 		"--nocheck",
 		"--noconfirm",
 		//"PKGDEST=" + pkgdest,
-		"PKGEXT=" + ".pkg.tar.zst",
-		)
+		"PKGEXT="+".pkg.tar.zst",
+	)
 
 	errp, err := cmd.StderrPipe()
 	if err != nil {

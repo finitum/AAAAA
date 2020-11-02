@@ -36,7 +36,7 @@ func (rs *Routes) Login(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write(res)
 }
 
-func (rs *Routes) AddUser(w http.ResponseWriter, r *http.Request)  {
+func (rs *Routes) AddUser(w http.ResponseWriter, r *http.Request) {
 	var user models.User
 
 	if err := render.Bind(r, &user); err != nil {
