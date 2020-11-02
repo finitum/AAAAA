@@ -27,5 +27,8 @@ module.exports = {
         jest: true
       }
     }
+  ],
+  ignorePatterns: [
+      "humanizeDuration.js"
   ]
 };

@@ -6,13 +6,14 @@
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "test:unit": "vue-cli-service test:unit",
-    "lint": "vue-cli-service lint"
+    "lint": "vue-cli-service lint",
+    "lint-fix": "vue-cli-service lint --fix"
   },
   "dependencies": {
     "autoprefixer": "^9",
-    "postcss-import": "^13.0.0",
-    "postcss-loader": "^4.0.4",
-    "postcss-nested": "^5.0.1",
+    "postcss-import": "^12",
+    "postcss-loader": "^3",
+    "postcss-nested": "^4",
     "tailwindcss": "^1.9.6",
     "vue": "^3.0.0",
     "vue-router": "^4.0.0-0"
