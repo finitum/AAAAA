@@ -1,12 +1,15 @@
 package routes
 
 import (
+	"context"
 	"errors"
+	"github.com/finitum/AAAAA/pkg/executor"
 	"github.com/finitum/AAAAA/pkg/git"
 	"github.com/finitum/AAAAA/pkg/models"
 	"github.com/finitum/AAAAA/pkg/repo_add"
 	"github.com/finitum/AAAAA/pkg/store"
 	"github.com/go-chi/chi"
+	"github.com/go-chi/jwtauth"
 	"github.com/go-chi/render"
 	"github.com/go-git/go-git/v5/plumbing"
 	log "github.com/sirupsen/logrus"
@@ -55,6 +58,44 @@ func (rs *Routes) AddPackage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusCreated)
+}
+
+func (rs *Routes) TriggerBuild(w http.ResponseWriter, r *http.Request) {
+	pkgName := chi.URLParam(r, "pkg")
+
+	pkg, err := rs.db.GetPackage(pkgName)
+	if err != nil {
+		_ = render.Render(w, r, ErrServerError(err))
+		return
+	}
+
+	token, _, err := jwtauth.FromContext(r.Context())
+	if err != nil {
+		_ = render.Render(w, r, ErrServerError(err))
+		return
+	}
+
+	tokenStr := token.Raw
+
+	go func() {
+		ctx := context.Background()
+
+		if err := rs.exec.PrepareBuild(ctx); err != nil {
+			log.Warnf("trigger prepare build %v", err)
+			return
+		}
+
+		// TODO URLs
+		if err := rs.exec.BuildPackage(ctx, &executor.Config{
+			Package:   pkg,
+			Token:     tokenStr,
+			UploadURL: "",
+			RepoURL:   "",
+		}); err != nil {
+			log.Warnf("trigger build %v", err)
+			return
+		}
+	}()
 }
 
 func (rs *Routes) UploadPackage(w http.ResponseWriter, r *http.Request) {
@@ -121,7 +162,6 @@ func (rs *Routes) UploadPackage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// TODO: sign
-
 
 	w.WriteHeader(http.StatusCreated)
 }

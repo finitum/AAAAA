@@ -19,7 +19,7 @@ type Config struct {
 type Executor interface {
 	// PrepareBuild should prepare the executor for incoming executions, this can be used to pull the latest
 	// docker image for example
-	PrepareBuild(ctx context.Context)
+	PrepareBuild(ctx context.Context) error
 
 	// BuildPackage should build the latest package and upload it to the url specified in the Config
 	BuildPackage(ctx context.Context, cfg *Config) error
