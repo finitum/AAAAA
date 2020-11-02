@@ -13,7 +13,7 @@ export default defineComponent({
 });
 </script>
 
-<style>
+<style lang="postcss">
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
