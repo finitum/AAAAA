@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/finitum/AAAAA/pkg/auth"
+	"github.com/finitum/AAAAA/pkg/executor"
 	"github.com/finitum/AAAAA/pkg/models"
 	"github.com/finitum/AAAAA/pkg/store"
 	"github.com/finitum/AAAAA/services/control_server/routes"
@@ -21,7 +22,7 @@ func main() {
 	// Open Database
 	db, err := store.OpenBadgerStore(os.TempDir() + "/AAAAA")
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("Opening Badger store failed: %v", err)
 	}
 
 	tokenAuth := jwtauth.New(jwt.SigningMethodHS384.Name, []byte("change me"), nil)
@@ -32,8 +33,14 @@ func main() {
 	// Create initial user
 	initialUser(db, auths)
 
+	// Exec
+	exec, err := executor.NewDockerExecutor("aaaaa-builder")
+	if err != nil {
+		log.Fatalf("Starting docker executor failed: %v", err)
+	}
+
 	// Router
-	rs := routes.New(db, auths)
+	rs := routes.New(db, auths, exec)
 
 	r := chi.NewRouter()
 	r.Use(middleware.StripSlashes)
@@ -46,6 +53,7 @@ func main() {
 	r.Get("/", rs.HelloWorld)
 
 	r.Post("/login", rs.Login)
+	r.Get("/package", rs.GetPackages)
 
 	// Protected Routes
 	r.Group(func(r chi.Router) {
@@ -57,6 +65,9 @@ func main() {
 
 		r.Post("/user", rs.AddUser)
 		r.Post("/package", rs.AddPackage)
+
+		r.Post("/package/{pkg}", rs.UploadPackage)
+		r.Put("/package/{pkg}/build", rs.TriggerBuild)
 	})
 
 	log.Fatal(http.ListenAndServe(":5000", r))
@@ -86,5 +97,5 @@ func initialUser(db store.Store, auths auth.AuthenticationService) {
 		log.Fatal(err)
 	}
 
-	log.Infof( "|> username: admin, password: %s \n", pass)
+	log.Infof("|> username: admin, password: %s \n", pass)
 }
