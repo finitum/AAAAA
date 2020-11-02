@@ -34,7 +34,7 @@ func main() {
 	initialUser(db, auths)
 
 	// Exec
-	exec, err := executor.NewDockerExecutor("archlinux")
+	exec, err := executor.NewDockerExecutor("aaaaa-builder")
 	if err != nil {
 		log.Fatalf("Starting docker executor failed: %v", err)
 	}

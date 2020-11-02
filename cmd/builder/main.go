@@ -29,6 +29,7 @@ func main() {
 		log.Fatalf("Couldn't create temp dir %s", dir)
 	}
 
+	log.Println("Cloning repo...")
 	// Git clone pkg.RepoURL --depth=1
 	repo, err := git.Clone(dir, cfg.Package.RepoURL, cfg.Package.RepoBranch);
 	if err != nil {
@@ -44,7 +45,7 @@ func main() {
 		log.Fatal("Couldn't cd into git repo")
 	}
 
-	// makepkg -si
+	log.Println("Building pacakge")
 	if err := makepkg.Build(); err != nil {
 		log.Fatalf("Building package failed %v", err)
 	}
@@ -73,7 +74,10 @@ func main() {
 
 	src := makepkg.ParseSrcInfo(string(srcinfo))
 
+	log.Printf("parsed srcinfo: %v", src)
+
 	// Upload built package
+	log.Println("Uploading package")
 	UploadPackage(cfg, src, found, hash.String())
 }
 
@@ -87,12 +91,19 @@ func UploadPackage(cfg executor.Config, srcinfo *makepkg.SrcInfo, filename, hash
 	if err != nil {
 		log.Fatal("yikes2")
 	}
-	req.URL.Query().Set("waaaa", "luigi")
-	req.URL.Query().Set("hash", hash)
-	req.URL.Query().Set("filename", filename)
+
+	q := req.URL.Query()
+
+	q.Set("waaaa", "luigi")
+	q.Set("hash", hash)
+	q.Set("filename", filename)
+
+	req.URL.RawQuery = q.Encode()
 
 	req.Header.Set("Authorization", "Bearer " + cfg.Token)
 	req.Header.Set("Content-Type", "application/octet-stream")
+
+	log.Printf("Upload URL: %s\n", req.URL.String())
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil || resp.StatusCode != http.StatusCreated {

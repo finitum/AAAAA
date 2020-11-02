@@ -28,6 +28,9 @@ func ParseSrcInfo(srcinfo string) *SrcInfo {
 			continue
 		}
 
+		parts[0] = strings.TrimSpace(parts[0])
+		parts[1] = strings.TrimSpace(parts[1])
+
 		switch parts[0] {
 		case "pkgname":
 			info.PackageName = parts[1]

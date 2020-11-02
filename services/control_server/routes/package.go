@@ -41,7 +41,7 @@ func (rs *Routes) AddPackage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	_, err := rs.db.GetPackage(pkg.Name)
-	if err == store.ErrNotExists {
+	if err != store.ErrNotExists {
 		_ = render.Render(w, r, ErrExists())
 		return
 	}
@@ -82,15 +82,13 @@ func (rs *Routes) TriggerBuild(w http.ResponseWriter, r *http.Request) {
 
 		if err := rs.exec.PrepareBuild(ctx); err != nil {
 			log.Warnf("trigger prepare build %v", err)
-			return
 		}
 
 		// TODO URLs
 		if err := rs.exec.BuildPackage(ctx, &executor.Config{
 			Package:   pkg,
 			Token:     tokenStr,
-			UploadURL: "",
-			RepoURL:   "",
+			UploadURL:   "http://192.168.0.150:5000/package",
 		}); err != nil {
 			log.Warnf("trigger build %v", err)
 			return

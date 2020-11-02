@@ -44,7 +44,7 @@ func (s StoreAuth) Register(user *models.User) error {
 	}
 
 	hash, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
-	if err != store.ErrNotExists {
+	if err != nil {
 		return errors.Wrap(err, "bcrypt generate")
 	}
 

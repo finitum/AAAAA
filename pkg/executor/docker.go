@@ -48,7 +48,9 @@ func (d *DockerExecutor) BuildPackage(ctx context.Context, cfg *Config) error {
 	}
 
 	resp, err := d.cli.ContainerCreate(ctx, &container.Config{
-		Image:           d.runnerImage,
+		Image: d.runnerImage,
+		Tty: true,
+		AttachStdout: true,
 		Env: []string{
 			"CONFIG=" + string(cfgb),
 		},
