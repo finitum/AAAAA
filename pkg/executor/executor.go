@@ -1,6 +1,9 @@
 package executor
 
-import "github.com/finitum/AAAAA/pkg/models"
+import (
+	"context"
+	"github.com/finitum/AAAAA/pkg/models"
+)
 
 type Config struct {
 	// Package
@@ -14,6 +17,10 @@ type Config struct {
 }
 
 type Executor interface {
+	// PrepareBuild should prepare the executor for incoming executions, this can be used to pull the latest
+	// docker image for example
+	PrepareBuild(ctx context.Context)
+
 	// BuildPackage should build the latest package and upload it to the url specified in the Config
-	BuildPackage(cfg *Config) error
+	BuildPackage(ctx context.Context, cfg *Config) error
 }
