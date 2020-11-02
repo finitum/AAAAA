@@ -9,6 +9,9 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
+    "autoprefixer": "^10.0.1",
+    "postcss-loader": "^4.0.4",
+    "tailwindcss": "^1.9.6",
     "vue": "^3.0.0",
     "vue-router": "^4.0.0-0"
   },
