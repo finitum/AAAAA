@@ -55,7 +55,7 @@ provides=('dummy=0.1')`)
 	err = cmd.Run()
 	assert.NoError(t, err)
 
-	err = repo.AddPackage(dir+"/dummy-0.1-1-any.pkg.tar.gz", RepoAddOptions{})
+	err = repo.AddPackage(dir+"/dummy-0.1-1-any.pkg.tar.gz", &RepoAddOptions{})
 	assert.NoError(t, err)
 
 	// Assert that it created the database file
@@ -66,6 +66,6 @@ provides=('dummy=0.1')`)
 	// TODO: This test should actually assert things about the database
 	// 		 I did manually check it working, but that't not really enough is it :P
 
-	err = os.RemoveAll(dir)
+	//err = os.RemoveAll(dir)
 	assert.NoError(t, err)
 }
