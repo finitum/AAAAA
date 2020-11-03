@@ -18,3 +18,9 @@ export interface Package {
 export function frequencyToDuration(freqns: number): string {
   return humanizeDuration(freqns / 1000 / 1000);
 }
+
+export interface User {
+  Username: string;
+  Password: string;
+}
+

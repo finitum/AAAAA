@@ -23,31 +23,29 @@
 
 <script lang="ts">
 import { defineComponent, reactive, ref } from "vue";
-import { Package } from "@/api/Package";
-import { frequencyToDuration } from "@/api/Package";
+import { Package } from "@/api/Models";
+import { frequencyToDuration } from "@/api/Models";
 
 async function fetchPackages(packages: Package[]) {
-  const receivedPackages: Package[] = [
-    {
-      Name: "test",
-      RepoURL: "github.com/test/test",
-      KeepLastN: 2,
-      RepoBranch: "main",
-      LastHash: "AAAAAA+/refs/main",
-      UpdateFrequency: 3600000000000
-    }
-  ];
+  const receivedPackage: Package = {
+    Name: "test",
+    RepoURL: "github.com/test/test",
+    KeepLastN: 2,
+    RepoBranch: "main",
+    LastHash: "AAAAAA+/refs/main",
+    UpdateFrequency: 3600000000000
+  };
 
-  packages.push(...receivedPackages);
-  packages.push(...receivedPackages);
-  packages.push(...receivedPackages);
+  packages.push(receivedPackage);
+  packages.push(receivedPackage);
+  packages.push(receivedPackage);
 }
 
 export default defineComponent({
   name: "PackageTable",
   setup() {
     const packages = reactive<Package[]>([]);
-    const simple = ref(true);
+    const simple = ref(false);
 
     fetchPackages(packages);
 

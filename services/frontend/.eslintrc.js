@@ -28,7 +28,5 @@ module.exports = {
       }
     }
   ],
-  ignorePatterns: [
-      "humanizeDuration.js"
-  ]
+  ignorePatterns: ["humanizeDuration.js"]
 };

@@ -1,2 +1,2 @@
-declare function humanizeDuration(number): string
-export default humanizeDuration
+declare function humanizeDuration(number): string;
+export default humanizeDuration;
