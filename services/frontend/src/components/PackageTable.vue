@@ -22,32 +22,16 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive, ref } from "vue";
-import { Package } from "@/api/Models";
+import { defineComponent, ref } from "vue";
+import * as API from "@/api/API";
 import { frequencyToDuration } from "@/api/Models";
-
-async function fetchPackages(packages: Package[]) {
-  const receivedPackage: Package = {
-    Name: "test",
-    RepoURL: "github.com/test/test",
-    KeepLastN: 2,
-    RepoBranch: "main",
-    LastHash: "AAAAAA+/refs/main",
-    UpdateFrequency: 3600000000000
-  };
-
-  packages.push(receivedPackage);
-  packages.push(receivedPackage);
-  packages.push(receivedPackage);
-}
 
 export default defineComponent({
   name: "PackageTable",
-  setup() {
-    const packages = reactive<Package[]>([]);
-    const simple = ref(false);
+  async setup() {
+    const simple = ref(true);
 
-    fetchPackages(packages);
+    const packages = await API.GetPackages();
 
     return {
       simple,

@@ -1,6 +1,13 @@
 <template>
   <div class="flex flex-col w-100 items-center">
-    <PackageTable />
+    <Suspense>
+      <template #default>
+        <PackageTable />
+      </template>
+      <template #fallback>
+        <div>Loading...</div>
+      </template>
+    </Suspense>
   </div>
 </template>
 
