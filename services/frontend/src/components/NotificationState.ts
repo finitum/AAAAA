@@ -1,7 +1,7 @@
-import {reactive} from "vue";
+import { reactive } from "vue";
 
 export const notificationState = reactive({
-    enabled: false,
-    message: "default message",
-    color: "#fff"
+  enabled: false,
+  message: "default message",
+  color: "#fff"
 });

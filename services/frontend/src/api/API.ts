@@ -30,6 +30,8 @@ client.interceptors.response.use(undefined, error => {
   return Promise.reject(error);
 });
 
+// Functions
+
 export async function GetPackages(): Promise<Package[]> {
   return client.get("/package").then(resp => resp.data);
 }
@@ -39,4 +41,12 @@ export async function Login(user: User): Promise<string | null> {
     token = resp.data["token"];
     return token;
   });
+}
+
+export async function AddPackage(pkg: Package): Promise<void> {
+  if (token == null) {
+    return Promise.reject("null token");
+  }
+
+  return client.post("/package", pkg);
 }
