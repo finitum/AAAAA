@@ -1,11 +1,31 @@
 <template>
-  <input id="search" v-model="term" @input="onInput" @keydown="onKeySearch" name="search" placeholder="yay" type="text" class="w-full"/>
+  <input
+    id="search"
+    v-model="term"
+    @input="onInput"
+    @keydown="onKeySearch"
+    name="search"
+    placeholder="yay"
+    type="text"
+    class="w-full"
+  />
   <div class="relative">
-    <div class="z-10 absolute flex flex-col w-inherit bg-gray-200 rounded-b border-t-2 shadow-xl -mt-1 w-full py-1">
-      <div v-for="result in results" v-bind:key="result.ID"
-           class="flex flex-row w-full px-2" @mouseover="selected = result.ID"
-           v-bind:class="{ active: selected === result.ID }" >
-        <span class="font-bold mr-1 flex-none">{{ result.Name }}</span><span class="opacity-50 min-w-0 overflow-hidden inline-block overflow-ellipsis whitespace-no-wrap mr-3">{{ result.Description }}</span> <span class="ml-auto flex-none">{{ result.Version }}</span>
+    <div
+      class="z-10 absolute flex flex-col w-inherit bg-gray-200 rounded-b border-t-2 shadow-xl -mt-1 w-full py-1"
+    >
+      <div
+        v-for="result in results"
+        v-bind:key="result.ID"
+        class="flex flex-row w-full px-2"
+        @mouseover="selected = result.ID"
+        v-bind:class="{ active: selected === result.ID }"
+      >
+        <span class="font-bold mr-1 flex-none">{{ result.Name }}</span
+        ><span
+          class="opacity-50 min-w-0 overflow-hidden inline-block overflow-ellipsis whitespace-no-wrap mr-3"
+          >{{ result.Description }}</span
+        >
+        <span class="ml-auto flex-none">{{ result.Version }}</span>
       </div>
     </div>
   </div>
@@ -13,28 +33,28 @@
 
 <script lang="ts">
 import { defineComponent, ref, reactive } from "vue";
-import {Result, search} from "@/api/AUR";
+import { Result, search } from "@/api/AUR";
 export default defineComponent({
   name: "Search",
   setup() {
-    const term = ref("")
-    const results: Result[] = reactive([])
-    const selected = ref(-1)
+    const term = ref("");
+    const results: Result[] = reactive([]);
+    const selected = ref(-1);
 
     function onKeySearch(event: KeyboardEvent) {
       console.log(event);
 
       let index = -1;
 
-      for (let i = 0; i < results.length - 1 ; i++) {
+      for (let i = 0; i < results.length - 1; i++) {
         if (results[i].ID === selected.value) {
-          index = i
-          break
+          index = i;
+          break;
         }
       }
 
       if (index === -1) {
-        index = 0
+        index = 0;
       }
 
       switch (event.key) {
@@ -42,7 +62,7 @@ export default defineComponent({
           event.preventDefault();
 
           index--;
-          if(index < 0) {
+          if (index < 0) {
             index = results.length - 1;
           }
           break;
@@ -52,8 +72,8 @@ export default defineComponent({
 
           index++;
 
-          if(index > results.length) {
-            index = 0
+          if (index > results.length) {
+            index = 0;
           }
           break;
         }
@@ -64,14 +84,18 @@ export default defineComponent({
 
     function onInput() {
       search(term.value).then(resp => {
-        results.splice(0, results.length)
-        results.push(...resp)
-      })
+        results.splice(0, results.length);
+        results.push(...resp);
+      });
     }
 
     return {
-      term, onInput, results, selected, onKeySearch
-    }
+      term,
+      onInput,
+      results,
+      selected,
+      onKeySearch
+    };
   }
 });
 </script>
