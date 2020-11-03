@@ -1,4 +1,4 @@
-import { GetPackages, Login} from "./API";
+import { GetPackages, Login } from "./API";
 import { Package, User } from "@/api/Models";
 import mockAxios from "jest-mock-axios";
 
