@@ -75,7 +75,7 @@
     let languagesFromOptions = [options.language];
 
     if (has(options, "fallbacks")) {
-      if (isArray(options.fallbacks) && options.fallbacks.length) {
+      if (Array.isArray(options.fallbacks) && options.fallbacks.length) {
         languagesFromOptions = languagesFromOptions.concat(options.fallbacks);
       } else {
         throw new Error("fallbacks must be an array with at least one element");
@@ -257,66 +257,6 @@
       return 3;
     }
   }
-
-  // Internal helper function for Russian and Ukranian languages.
-  function getSlavicForm(c) {
-    if (Math.floor(c) !== c) {
-      return 2;
-    } else if (
-      (c % 100 >= 5 && c % 100 <= 20) ||
-      (c % 10 >= 5 && c % 10 <= 9) ||
-      c % 10 === 0
-    ) {
-      return 0;
-    } else if (c % 10 === 1) {
-      return 1;
-    } else if (c > 1) {
-      return 2;
-    } else {
-      return 0;
-    }
-  }
-
-  // Internal helper function for Slovak language.
-  function getCzechOrSlovakForm(c) {
-    if (c === 1) {
-      return 0;
-    } else if (Math.floor(c) !== c) {
-      return 1;
-    } else if (c % 10 >= 2 && c % 10 <= 4 && c % 100 < 10) {
-      return 2;
-    } else {
-      return 3;
-    }
-  }
-
-  // Internal helper function for Lithuanian language.
-  function getLithuanianForm(c) {
-    if (c === 1 || (c % 10 === 1 && c % 100 > 20)) {
-      return 0;
-    } else if (
-      Math.floor(c) !== c ||
-      (c % 10 >= 2 && c % 100 > 20) ||
-      (c % 10 >= 2 && c % 100 < 10)
-    ) {
-      return 1;
-    } else {
-      return 2;
-    }
-  }
-
-  // Internal helper function for Latvian language.
-  function getLatvianForm(c) {
-    return c % 10 === 1 && c % 100 !== 11;
-  }
-
-  // We need to make sure we support browsers that don't have
-  // `Array.isArray`, so we define a fallback here.
-  var isArray =
-    Array.isArray ||
-    function(arg) {
-      return Object.prototype.toString.call(arg) === "[object Array]";
-    };
 
   function has(obj, key) {
     return Object.prototype.hasOwnProperty.call(obj, key);

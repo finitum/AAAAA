@@ -1,4 +1,3 @@
-// @ts-ignore
 import humanizeDuration from "@/utils/humanizeDuration";
 
 export interface Package {
