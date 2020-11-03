@@ -43,6 +43,10 @@ export async function Login(user: User): Promise<string | null> {
   });
 }
 
+export function isLoggedIn(): boolean {
+  return token != null;
+}
+
 export async function AddPackage(pkg: Package): Promise<void> {
   if (token == null) {
     return Promise.reject("null token");

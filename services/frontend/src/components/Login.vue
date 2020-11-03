@@ -28,23 +28,50 @@
       >
         <span class="label">
           <label for="username">Username:</label>
-          <input id="username" type="text" class="input-box" />
+          <input
+            v-model="user.Username"
+            id="username"
+            type="text"
+            class="input-box"
+          />
         </span>
         <span class="flex flex-col label">
           <label for="password">Password:</label>
-          <input id="password" type="password" class="input-box" />
+          <input
+            v-model="user.Password"
+            id="password"
+            type="password"
+            class="input-box"
+          />
         </span>
-        <button class="button w-1/3" @click="$emit('close')">Login</button>
+        <button class="button w-1/3" @click="ClickLogin">Login</button>
       </div>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent, reactive } from "vue";
+import { User } from "@/api/Models";
+import { Login } from "@/api/API";
 
 export default defineComponent({
-  name: "Login"
+  name: "Login",
+  setup(props, { emit }) {
+    const user: User = reactive({ Username: "", Password: "" });
+
+    function ClickLogin() {
+      Login(user).then(() => {
+        emit("login");
+        emit("close");
+      });
+    }
+
+    return {
+      user,
+      ClickLogin
+    };
+  }
 });
 </script>
 
