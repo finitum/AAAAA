@@ -36,7 +36,7 @@
   // You can create a humanizer, which returns a function with default
   // parameters.
   function humanizer(passedOptions) {
-    var result = function humanizer(ms, humanizerOptions) {
+    const result = function humanizer(ms, humanizerOptions) {
       const options = extend({}, result, humanizerOptions || {});
       return doHumanization(ms, options);
     };
@@ -70,30 +70,6 @@
   // The main function is just a wrapper around a default humanizer.
   const humanizeDuration = humanizer({});
 
-  // Build dictionary from options
-  function getDictionary(options) {
-    let languagesFromOptions = [options.language];
-
-    if (has(options, "fallbacks")) {
-      if (Array.isArray(options.fallbacks) && options.fallbacks.length) {
-        languagesFromOptions = languagesFromOptions.concat(options.fallbacks);
-      } else {
-        throw new Error("fallbacks must be an array with at least one element");
-      }
-    }
-
-    for (let i = 0; i < languagesFromOptions.length; i++) {
-      const languageToTry = languagesFromOptions[i];
-      if (has(options.languages, languageToTry)) {
-        return options.languages[languageToTry];
-      } else if (has(LANGUAGES, languageToTry)) {
-        return LANGUAGES[languageToTry];
-      }
-    }
-
-    throw new Error("No language found.");
-  }
-
   // doHumanization does the bulk of the work.
   function doHumanization(ms, options) {
     let i, len, piece;
@@ -102,7 +78,7 @@
     // Has the nice sideffect of turning Number objects into primitives.
     ms = Math.abs(ms);
 
-    const dictionary = getDictionary(options);
+    const dictionary = LANGUAGES["en"];
     const pieces = [];
 
     // Start at the top and keep removing units, bit by bit.
@@ -245,32 +221,9 @@
     return destination;
   }
 
-  // Internal helper function for Polish language.
-  function getPolishForm(c) {
-    if (c === 1) {
-      return 0;
-    } else if (Math.floor(c) !== c) {
-      return 1;
-    } else if (c % 10 >= 2 && c % 10 <= 4 && !(c % 100 > 10 && c % 100 < 20)) {
-      return 2;
-    } else {
-      return 3;
-    }
-  }
-
   function has(obj, key) {
     return Object.prototype.hasOwnProperty.call(obj, key);
   }
-
-  humanizeDuration.getSupportedLanguages = function getSupportedLanguages() {
-    const result = [];
-    for (const language in LANGUAGES) {
-      if (has(LANGUAGES, language) && language !== "gr") {
-        result.push(language);
-      }
-    }
-    return result;
-  };
 
   humanizeDuration.humanizer = humanizer;
 

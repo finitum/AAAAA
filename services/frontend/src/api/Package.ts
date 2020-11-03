@@ -16,5 +16,5 @@ export interface Package {
 }
 
 export function frequencyToDuration(freqns: number): string {
-  return humanizeDuration(freqns / 1000 / 1000, { language: "en" });
+  return humanizeDuration(freqns / 1000 / 1000);
 }

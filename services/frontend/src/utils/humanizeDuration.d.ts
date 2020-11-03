@@ -1,2 +1,2 @@
-declare function humanizeDuration(number, lang: {language: string}): string
+declare function humanizeDuration(number): string
 export default humanizeDuration
