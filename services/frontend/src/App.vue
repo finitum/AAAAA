@@ -28,4 +28,8 @@ export default defineComponent({
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+html {
+  background: #f4f6f7;
+}
 </style>

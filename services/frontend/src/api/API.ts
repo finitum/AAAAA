@@ -31,7 +31,6 @@ client.interceptors.response.use(undefined, error => {
 });
 
 // Functions
-
 export async function GetPackages(): Promise<Package[]> {
   return client.get("/package").then(resp => resp.data);
 }

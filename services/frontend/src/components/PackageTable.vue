@@ -1,6 +1,6 @@
 <template>
-  <div class="inline-block shadow rounded-lg overflow-hidden mt-2 min-w-2/3">
-    <table class="border-collapse min-w-full">
+  <div class="inline-block shadow rounded-lg overflow-hidden mt-2 min-w-full">
+    <table class="border-collapse min-w-full bg-white">
       <tr class="bg-secondary text-white">
         <th>Name</th>
         <th>Repo url</th>
@@ -29,7 +29,7 @@ import { frequencyToDuration } from "@/api/Models";
 export default defineComponent({
   name: "PackageTable",
   async setup() {
-    const simple = ref(true);
+    const simple = ref(false);
 
     const packages = await API.GetPackages();
 
