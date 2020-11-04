@@ -6,6 +6,7 @@ import (
 	"github.com/dgraph-io/badger/v2"
 	"github.com/finitum/AAAAA/pkg/aur"
 	"github.com/pkg/errors"
+	log "github.com/sirupsen/logrus"
 	"time"
 )
 
@@ -15,6 +16,7 @@ type BadgerCache struct {
 
 const cachePrefix = "cache_"
 const cacheTTL = 30 * time.Minute
+const gcTime = 5 * time.Minute
 
 func OpenBadgerCache(path string) (*BadgerCache, error) {
 	db, err := badger.Open(badger.DefaultOptions(path + ".cache"))
@@ -22,7 +24,18 @@ func OpenBadgerCache(path string) (*BadgerCache, error) {
 		return nil, errors.Wrap(err, "opening badger store")
 	}
 
-	// TODO: Schedule garbage collection
+	go func() {
+		ticker := time.NewTicker(gcTime)
+		defer ticker.Stop()
+		for range ticker.C {
+		again:
+			log.Debug("Garbage collection started")
+			err := db.RunValueLogGC(0.7)
+			if err == nil {
+				goto again
+			}
+		}
+	}()
 
 	return &BadgerCache{
 		db,
