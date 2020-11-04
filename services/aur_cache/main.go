@@ -48,7 +48,7 @@ func proxy(cache store.Cache, w http.ResponseWriter, r *http.Request) {
 
 	cachedResult, exact, err := cache.GetEntry(term)
 	if err == nil {
-		log.Info("Cache hit!")
+		log.Trace("Cache hit!")
 		var filteredResult aur.Results
 		if exact {
 			filteredResult = cachedResult
@@ -80,7 +80,7 @@ func proxy(cache store.Cache, w http.ResponseWriter, r *http.Request) {
 	if err != store.ErrNotExists {
 		log.Errorf("An unexpected error occurred while retrieving cache results. Attempting a non-cached lookup (%v)", err)
 	} else {
-		log.Info("Cache miss!")
+		log.Trace("Cache miss!")
 	}
 
 	resp, err := http.Get(fmt.Sprintf(aurRpcQueryFmt, term))

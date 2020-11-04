@@ -13,7 +13,7 @@ type Badger struct {
 }
 
 const pkgPrefix = "pkg_"
-const cachePrefix = "cache_"
+const userPrefix = "user_"
 
 func OpenBadgerStore(path string) (*Badger, error) {
 	db, err := badger.Open(badger.DefaultOptions(path + ".store"))

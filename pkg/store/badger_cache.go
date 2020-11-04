@@ -13,7 +13,7 @@ type BadgerCache struct {
 	db *badger.DB
 }
 
-const userPrefix = "user_"
+const cachePrefix = "cache_"
 const cacheTTL = 30 * time.Minute
 
 func OpenBadgerCache(path string) (*BadgerCache, error) {
