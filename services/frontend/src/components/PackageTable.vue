@@ -58,7 +58,6 @@ td {
   which doesn't work as well for us because the columns can change (depending on simple vs non-simple layout)
   */
   display: table-caption;
-  caption-side:bottom
+  caption-side: bottom;
 }
-
 </style>

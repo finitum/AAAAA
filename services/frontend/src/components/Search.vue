@@ -12,23 +12,28 @@
     class="w-full"
   />
   <div class="relative" v-show="showResults">
-    <div class="absolute flex flex-col w-inherit bg-gray-200 rounded-b border-t-2 shadow-xl -mt-1 w-full py-1">
+    <div
+      class="absolute flex flex-col w-inherit bg-gray-200 rounded-b border-t-2 shadow-xl -mt-1 w-full py-1"
+    >
       <div
         v-for="result of results"
         v-bind:key="result.ID"
         class="flex flex-row w-full px-2 cursor-pointer"
         @mouseover="selected = result.ID"
-        v-bind:class="{ active: selected === result.ID }">
-          <span class="font-bold mr-1 flex-none">
-            {{ result.Name }}
-          </span>
-          <span class="opacity-50 min-w-0 overflow-hidden inline-block overflow-ellipsis whitespace-no-wrap mr-3">
-            {{ result.Description }}
-          </span>
-          <span class="ml-auto flex-none">
-            {{ result.Version }}
-          </span>
-        </div>
+        v-bind:class="{ active: selected === result.ID }"
+      >
+        <span class="font-bold mr-1 flex-none">
+          {{ result.Name }}
+        </span>
+        <span
+          class="opacity-50 min-w-0 overflow-hidden inline-block overflow-ellipsis whitespace-no-wrap mr-3"
+        >
+          {{ result.Description }}
+        </span>
+        <span class="ml-auto flex-none">
+          {{ result.Version }}
+        </span>
+      </div>
     </div>
   </div>
 </template>
