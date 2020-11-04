@@ -29,9 +29,7 @@ func main() {
 		log.Fatalf("Couldn't open store (%v)", err)
 	}
 
-	r.Get("/search/{term}", func(writer http.ResponseWriter, request *http.Request) {
-		proxy(cache, writer, request)
-	})
+	r.Get("/search/{term}", proxy(cache))
 
 	log.Fatal(http.ListenAndServe(":5001", r))
 }
@@ -39,82 +37,81 @@ func main() {
 const aurRpcQueryFmt = "https://aur.archlinux.org/rpc/?v=5&type=search&arg=%s"
 const maxReturn int = 50
 
-func proxy(cache store.Cache, w http.ResponseWriter, r *http.Request) {
-	term := chi.URLParam(r, "term")
-	if len(term) < 3 {
-		http.Error(w, "term too short", http.StatusBadRequest)
-		return
-	}
-
-	cachedResult, exact, err := cache.GetEntry(term)
-	if err == nil {
-		log.Trace("Cache hit!")
-		var filteredResult aur.Results
-		if exact {
-			filteredResult = cachedResult
-			if len(filteredResult) > maxReturn {
-				filteredResult = filteredResult[:maxReturn]
-			}
-
-		} else {
-			filteredResult = make([]aur.Result, len(cachedResult))
-			fi := 0
-			// The cached result may contain too many entries. Manual filter required
-			for _, i := range cachedResult {
-				if strings.Contains(i.Description, term) || strings.Contains(i.Name, term) {
-					filteredResult[fi] = i
-					fi++
-				}
-
-				if fi > maxReturn {
-					break
-				}
-			}
+func proxy(cache store.Cache) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		term := chi.URLParam(r, "term")
+		if len(term) < 3 {
+			http.Error(w, "term too short", http.StatusBadRequest)
+			return
 		}
 
-		_ = render.Render(w, r, filteredResult)
-		return
+		cachedResult, exact, err := cache.GetEntry(term)
+		if err == nil {
+			log.Trace("Cache hit!")
+			if exact {
+				if len(cachedResult) > maxReturn {
+					cachedResult = cachedResult[:maxReturn]
+				}
+			} else {
+				fi := 0
+				// The cached result may contain too many entries. Manual filter required
+				for _, item := range cachedResult {
+					if strings.Contains(item.Description, term) || strings.Contains(item.Name, term) {
+						cachedResult[fi] = item
+						fi++
+					}
+
+					if fi > maxReturn {
+						break
+					}
+				}
+
+				cachedResult = cachedResult[:fi]
+			}
+
+			_ = render.Render(w, r, cachedResult)
+			return
+		}
+
+		// otherwise it's just a cache miss
+		if err != store.ErrNotExists {
+			log.Errorf("An unexpected error occurred while retrieving cache results. Attempting a non-cached lookup (%v)", err)
+		} else {
+			log.Trace("Cache miss!")
+		}
+
+		resp, err := http.Get(fmt.Sprintf(aurRpcQueryFmt, term))
+		if err != nil {
+			http.Error(w, "received error from aur rpc", http.StatusBadGateway)
+			return
+		}
+
+		var res aur.ExtendedResults
+		err = json.NewDecoder(resp.Body).Decode(&res)
+		if err != nil {
+			http.Error(w, "couldn't decode result", http.StatusBadGateway)
+			log.Error(err)
+			return
+		}
+
+		if res.Error != "" {
+			http.Error(w, res.Error, http.StatusBadRequest)
+			return
+		}
+
+		// Sort first
+		res.Results.SortByPopularity()
+
+		// Store later
+		err = cache.SetEntry(term, res.Results)
+		if err != nil {
+			// A cache error means we can still return the results we looked up.
+			log.Errorf("Failed to set cache entry (%v)", err)
+		}
+
+		if len(res.Results) > maxReturn {
+			res.Results = res.Results[:maxReturn]
+		}
+		_ = render.Render(w, r, res.Results)
 	}
-
-	// otherwise it's just a cache miss
-	if err != store.ErrNotExists {
-		log.Errorf("An unexpected error occurred while retrieving cache results. Attempting a non-cached lookup (%v)", err)
-	} else {
-		log.Trace("Cache miss!")
-	}
-
-	resp, err := http.Get(fmt.Sprintf(aurRpcQueryFmt, term))
-	if err != nil {
-		http.Error(w, "received error from aur rpc", http.StatusBadGateway)
-		return
-	}
-
-	var res aur.ExtendedResults
-	err = json.NewDecoder(resp.Body).Decode(&res)
-	if err != nil {
-		http.Error(w, "couldn't decode result", http.StatusBadGateway)
-		log.Error(err)
-		return
-	}
-
-	if res.Error != "" {
-		http.Error(w, res.Error, http.StatusBadRequest)
-		return
-	}
-
-	// Sort first
-	res.Results.SortByPopularity()
-
-	// Store later
-	err = cache.SetEntry(term, res.Results)
-	if err != nil {
-		// A cache error means we can still return the results we looked up.
-		log.Errorf("Failed to set cache entry (%v)", err)
-	}
-
-	if len(res.Results) > maxReturn {
-		res.Results = res.Results[:maxReturn]
-	}
-
-	_ = render.Render(w, r, res.Results)
 }
