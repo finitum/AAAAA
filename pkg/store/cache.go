@@ -3,8 +3,8 @@ package store
 import "github.com/finitum/AAAAA/pkg/aur"
 
 type AurCache interface {
-	SetEntry(searchterm string, result aur.Results) (error)
-	GetEntry(searchterm string) (aur.Results, error)
+	SetEntry(searchterm string, result aur.Results) error
+	GetEntry(searchterm string) (aur.Results, bool, error)
 }
 
 type Cache interface {

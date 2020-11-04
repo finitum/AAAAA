@@ -35,12 +35,9 @@ func (r Results) Render(http.ResponseWriter, *http.Request) error {
 }
 
 type ExtendedResults struct {
-	Version     int      `json:"version"`
-	Type        string   `json:"type"`
-	Results     Results  `json:"results"`
-	ResultCount int      `json:"resultcount"`
-	Error       string   `json:"error"`
+	Version     int     `json:"version"`
+	Type        string  `json:"type"`
+	Results     Results `json:"results"`
+	ResultCount int     `json:"resultcount"`
+	Error       string  `json:"error"`
 }
-
-
-

@@ -40,7 +40,7 @@ func (b *BadgerCache) SetEntry(searchterm string, result aur.Results) error {
 		}
 
 		// Add the main key to the store
-		mainEntryKey := []byte(cachePrefix+searchterm)
+		mainEntryKey := []byte(cachePrefix + searchterm)
 		mainEntry := badger.NewEntry(mainEntryKey, value.Bytes()).WithTTL(cacheTTL)
 		err = txn.SetEntry(mainEntry)
 		if err != nil {
@@ -51,17 +51,20 @@ func (b *BadgerCache) SetEntry(searchterm string, result aur.Results) error {
 	})
 }
 
-func (b *BadgerCache) GetEntry(searchterm string) (aur.Results, error) {
+func (b *BadgerCache) GetEntry(searchterm string) (aur.Results, bool, error) {
 	var result aur.Results
+	exact := true
 
 	err := b.db.View(func(txn *badger.Txn) error {
 		// Add all the smaller strings to the database as well, to ensure a quicker lookup
-		for i := len(searchterm) - 1; i > 2; i-- {
+		for i := len(searchterm); i > 2; i-- {
 			actualSearchterm := []byte(cachePrefix + searchterm[:i])
 
 			// Get a value from the store. This may be a pointer to another key
 			item, err := txn.Get(actualSearchterm)
 			if err == badger.ErrKeyNotFound {
+				// After the first iteration it's not exact anymore
+				exact = false
 				continue
 			} else if err != nil {
 				return errors.Wrap(err, "badger get")
@@ -81,8 +84,8 @@ func (b *BadgerCache) GetEntry(searchterm string) (aur.Results, error) {
 	})
 
 	if err != nil {
-		return nil, err
+		return nil, false, err
 	}
 
-	return result,  err
+	return result, exact, err
 }

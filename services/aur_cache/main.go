@@ -15,7 +15,7 @@ import (
 	"strings"
 )
 
-func main()  {
+func main() {
 	r := chi.NewRouter()
 	r.Use(middleware.StripSlashes)
 	r.Use(middleware.Logger)
@@ -46,17 +46,29 @@ func proxy(cache store.Cache, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	cachedResult, err := cache.GetEntry(term)
+	cachedResult, exact, err := cache.GetEntry(term)
 	if err == nil {
 		log.Info("Cache hit!")
-		filteredResult := aur.Results(make([]aur.Result, len(cachedResult)))
+		var filteredResult aur.Results
+		if exact {
+			filteredResult = cachedResult
+			if len(filteredResult) > maxReturn {
+				filteredResult = filteredResult[:maxReturn]
+			}
 
-		fi := 0
-		// The cached result may contain too many entries. Manual filter required
-		for _, i := range cachedResult {
-			if strings.Contains(i.Description, term) || strings.Contains(i.Name, term) {
-				filteredResult[fi] = i
-				fi++
+		} else {
+			filteredResult = make([]aur.Result, len(cachedResult))
+			fi := 0
+			// The cached result may contain too many entries. Manual filter required
+			for _, i := range cachedResult {
+				if strings.Contains(i.Description, term) || strings.Contains(i.Name, term) {
+					filteredResult[fi] = i
+					fi++
+				}
+
+				if fi > maxReturn {
+					break
+				}
 			}
 		}
 
