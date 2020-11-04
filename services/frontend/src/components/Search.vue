@@ -4,27 +4,25 @@
     v-model="term"
     @input="onInput"
     @keydown="onKeySearch"
+    @focusin="showResults = true"
+    @focusout="showResults = false"
     name="search"
-    placeholder="yay"
+    placeholder="search for packages here"
     type="text"
     class="w-full"
   />
-  <div class="relative">
-    <div
-      class="z-10 absolute flex flex-col w-inherit bg-gray-200 rounded-b border-t-2 shadow-xl -mt-1 w-full py-1"
-    >
+  <div class="relative" v-show="showResults">
+    <div class="absolute flex flex-col w-inherit bg-gray-200 rounded-b border-t-2 shadow-xl -mt-1 w-full py-1">
       <div
-        v-for="result in results"
+        v-for="result of results"
         v-bind:key="result.ID"
-        class="flex flex-row w-full px-2"
+        class="flex flex-row w-full px-2 cursor-pointer"
         @mouseover="selected = result.ID"
-        v-bind:class="{ active: selected === result.ID }"
-      >
-        <span class="font-bold mr-1 flex-none">{{ result.Name }}</span
-        ><span
-          class="opacity-50 min-w-0 overflow-hidden inline-block overflow-ellipsis whitespace-no-wrap mr-3"
-          >{{ result.Description }}</span
-        >
+        v-bind:class="{ active: selected === result.ID }">
+        <span class="font-bold mr-1 flex-none">{{ result.Name }}</span>
+        <span class="opacity-50 min-w-0 overflow-hidden inline-block overflow-ellipsis whitespace-no-wrap mr-3">
+          {{ result.Description }}
+        </span>
         <span class="ml-auto flex-none">{{ result.Version }}</span>
       </div>
     </div>
@@ -40,6 +38,7 @@ export default defineComponent({
     const term = ref("");
     const results: Result[] = reactive([]);
     const selected = ref(-1);
+    const showResults = ref(false);
 
     function onKeySearch(event: KeyboardEvent) {
       console.log(event);
@@ -94,7 +93,8 @@ export default defineComponent({
       onInput,
       results,
       selected,
-      onKeySearch
+      onKeySearch,
+      showResults
     };
   }
 });
