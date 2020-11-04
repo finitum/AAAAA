@@ -23,6 +23,7 @@ type UserStore interface {
 	AllUserNames() ([]string, error)
 }
 
+
 type Store interface {
 	PackageStore
 	UserStore

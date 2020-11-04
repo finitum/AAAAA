@@ -17,6 +17,9 @@
         <td v-if="!simple">{{ pkg.KeepLastN }}</td>
         <td>{{ frequencyToDuration(pkg.UpdateFrequency) }}</td>
       </tr>
+      <tr v-if="packages.length === 0" class="text-center caption py-4">
+        There are no packages yet.
+      </tr>
     </table>
   </div>
 </template>
@@ -47,4 +50,15 @@ th,
 td {
   @apply px-5 text-center border-collapse py-2 table-cell border-b-2 border-gray-100 border-opacity-25;
 }
+
+.caption {
+  /*
+  Spans a tr the entire width of the table, without using colspan=0. With colspan 0 there seems to be a
+  bug where text isn't centered. Only a positive non-zero integer allows text to be centered between columns,
+  which doesn't work as well for us because the columns can change (depending on simple vs non-simple layout)
+  */
+  display: table-caption;
+  caption-side:bottom
+}
+
 </style>

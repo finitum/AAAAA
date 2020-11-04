@@ -19,12 +19,16 @@
         class="flex flex-row w-full px-2 cursor-pointer"
         @mouseover="selected = result.ID"
         v-bind:class="{ active: selected === result.ID }">
-        <span class="font-bold mr-1 flex-none">{{ result.Name }}</span>
-        <span class="opacity-50 min-w-0 overflow-hidden inline-block overflow-ellipsis whitespace-no-wrap mr-3">
-          {{ result.Description }}
-        </span>
-        <span class="ml-auto flex-none">{{ result.Version }}</span>
-      </div>
+          <span class="font-bold mr-1 flex-none">
+            {{ result.Name }}
+          </span>
+          <span class="opacity-50 min-w-0 overflow-hidden inline-block overflow-ellipsis whitespace-no-wrap mr-3">
+            {{ result.Description }}
+          </span>
+          <span class="ml-auto flex-none">
+            {{ result.Version }}
+          </span>
+        </div>
     </div>
   </div>
 </template>

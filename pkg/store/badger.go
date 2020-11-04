@@ -13,13 +13,17 @@ type Badger struct {
 }
 
 const pkgPrefix = "pkg_"
-const userPrefix = "user_"
+const cachePrefix = "cache_"
 
 func OpenBadgerStore(path string) (*Badger, error) {
-	db, err := badger.Open(badger.DefaultOptions(path))
+	db, err := badger.Open(badger.DefaultOptions(path + ".store"))
 	if err != nil {
 		return nil, errors.Wrap(err, "opening badger store")
 	}
+
+	// TODO: Schedule garbage collection (maybe on the same scheduler that schedules new builds on the control server?)
+	//       Also depends on the todo in store.go about whether or not we want to keep the cache and other data
+	//       in the same store.
 
 	return &Badger{
 		db,
