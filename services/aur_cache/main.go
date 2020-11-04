@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/finitum/AAAAA/pkg/aur"
@@ -24,10 +25,14 @@ func main() {
 	r.Use(cors.Handler(cors.Options{AllowedOrigins: []string{"*"}}))
 	r.Use(render.SetContentType(render.ContentTypeJSON))
 
-	cache, err := store.OpenBadgerCache(os.TempDir() + "/AAAAA")
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	cache, err := store.OpenBadger(os.TempDir() + "/AAAAA-cache")
 	if err != nil {
 		log.Fatalf("Couldn't open store (%v)", err)
 	}
+	cache.StartGC(ctx)
 
 	r.Get("/search/{term}", proxy(cache))
 
