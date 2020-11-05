@@ -25,14 +25,28 @@ func main() {
 	r.Use(cors.Handler(cors.Options{AllowedOrigins: []string{"*"}}))
 	r.Use(render.SetContentType(render.ContentTypeJSON))
 
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
+	cachetype := os.Getenv("CACHE_TYPE")
+	var cache store.Cache
 
-	cache, err := store.OpenBadger(os.TempDir() + "/AAAAA-cache")
-	if err != nil {
-		log.Fatalf("Couldn't open store (%v)", err)
+	switch strings.ToLower(cachetype) {
+	default:
+		fallthrough
+	case "ristretto":
+		var err error
+		cache, err = store.NewRistretto()
+		if err != nil {
+			log.Fatalf("Couldn't open ristretto cache: %v", err)
+		}
+	case "badger":
+		ctx, cancel := context.WithCancel(context.Background())
+		defer cancel()
+		badger, err := store.OpenBadger(os.TempDir() + "/AAAAA-cache")
+		if err != nil {
+			log.Fatalf("Couldn't open ristretto cache: %v", err)
+		}
+		badger.StartGC(ctx)
+		cache = badger
 	}
-	cache.StartGC(ctx)
 
 	r.Get("/search/{term}", proxy(cache))
 
@@ -50,7 +64,7 @@ func proxy(cache store.Cache) http.HandlerFunc {
 			return
 		}
 
-		cachedResult, exact, err := cache.GetEntry(term)
+		cachedResult, exact, err := store.GetPartialCacheEntry(cache, term)
 		if err == nil {
 			log.Trace("Cache hit!")
 			if exact {

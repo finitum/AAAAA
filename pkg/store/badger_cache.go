@@ -6,12 +6,9 @@ import (
 	"github.com/dgraph-io/badger/v2"
 	"github.com/finitum/AAAAA/pkg/aur"
 	"github.com/pkg/errors"
-	"time"
 )
 
-
 const cachePrefix = "cache_"
-const cacheTTL = 30 * time.Minute
 
 func (b *Badger) SetEntry(searchterm string, result aur.Results) error {
 	return b.db.Update(func(txn *badger.Txn) error {
@@ -35,41 +32,20 @@ func (b *Badger) SetEntry(searchterm string, result aur.Results) error {
 	})
 }
 
-func (b *Badger) GetEntry(searchterm string) (aur.Results, bool, error) {
-	var result aur.Results
-	exact := true
-
-	err := b.db.View(func(txn *badger.Txn) error {
-		// Add all the smaller strings to the database as well, to ensure a quicker lookup
-		for i := len(searchterm); i > 2; i-- {
-			actualSearchterm := []byte(cachePrefix + searchterm[:i])
-
-			// Get a value from the store. This may be a pointer to another key
-			item, err := txn.Get(actualSearchterm)
-			if err == badger.ErrKeyNotFound {
-				// After the first iteration it's not exact anymore
-				exact = false
-				continue
-			} else if err != nil {
-				return errors.Wrap(err, "badger get")
-			}
-
-			err = item.Value(func(val []byte) error {
-				buf := bytes.NewBuffer(val)
-
-				dec := gob.NewDecoder(buf)
-				return errors.Wrap(dec.Decode(&result), "gob decode")
-			})
-
-			return errors.Wrap(err, "badger read")
+func (b *Badger) GetEntry(term string) (result aur.Results, _ error) {
+	return result, b.db.View(func(txn *badger.Txn) error {
+		item, err := txn.Get([]byte(cachePrefix + term))
+		if err == badger.ErrKeyNotFound {
+			return ErrNotExists
+		} else if err != nil {
+			return errors.Wrap(err, "badger get")
 		}
 
-		return ErrNotExists
+		return item.Value(func(val []byte) error {
+			buf := bytes.NewBuffer(val)
+
+			dec := gob.NewDecoder(buf)
+			return errors.Wrap(dec.Decode(&result), "gob decode")
+		})
 	})
-
-	if err != nil {
-		return nil, false, err
-	}
-
-	return result, exact, err
 }

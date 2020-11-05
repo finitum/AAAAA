@@ -1,9 +1,10 @@
 package store
 
 import (
-	"errors"
 	"github.com/finitum/AAAAA/pkg/aur"
 	"github.com/finitum/AAAAA/pkg/models"
+	"github.com/pkg/errors"
+	"time"
 )
 
 var ErrNotExists = errors.New("entry does not exist")
@@ -24,12 +25,33 @@ type UserStore interface {
 	AllUserNames() ([]string, error)
 }
 
+const cacheTTL = 30 * time.Minute
+
 type Cache interface {
 	SetEntry(searchterm string, result aur.Results) error
-	GetEntry(searchterm string) (aur.Results, bool, error)
+	GetEntry(searchterm string) (aur.Results, error)
 }
 
 type Store interface {
 	PackageStore
 	UserStore
+}
+
+func GetPartialCacheEntry(cache Cache, term string) (aur.Results, bool, error) {
+	exact := true
+	for i := len(term); i > 2; i-- {
+		toSearch := term[:i]
+
+		item, err := cache.GetEntry(toSearch)
+		if err == ErrNotExists {
+			exact = false
+			continue
+		} else if err != nil {
+			return nil, false, errors.Wrap(err, "getting partial entry")
+		}
+
+		return item, exact, nil
+	}
+
+	return nil, false, ErrNotExists
 }
