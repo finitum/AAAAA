@@ -71,9 +71,14 @@ func (d *DockerExecutor) BuildPackage(ctx context.Context, cfg *Config) error {
 
 	// Remove from map when done
 	go func() {
-		_, err := d.cli.ContainerWait(ctx, resp.ID)
-		if err != nil {
-			log.Warnf("[docker] waiting for container failed: %v", err)
+		statusCh, errCh := d.cli.ContainerWait(ctx, resp.ID, container.WaitConditionNotRunning)
+
+		select {
+		case err := <-errCh:
+			if err != nil {
+				log.Warnf("[docker] waiting for container failed: %v", err)
+			}
+		case <-statusCh:
 		}
 
 		// TODO: Check status

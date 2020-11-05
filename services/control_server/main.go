@@ -12,6 +12,7 @@ import (
 	"github.com/finitum/AAAAA/services/control_server/routes"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
+	"github.com/go-chi/cors"
 	"github.com/go-chi/jwtauth"
 	"github.com/go-chi/render"
 	log "github.com/sirupsen/logrus"
@@ -25,7 +26,7 @@ func main() {
 	}
 
 	// Open Database
-	db, err := store.OpenBadgerStore(cfg.StoreLocation)
+	db, err := store.OpenBadger(cfg.StoreLocation)
 	if err != nil {
 		log.Fatalf("Opening Badger store failed: %v", err)
 	}
@@ -51,6 +52,7 @@ func main() {
 	r.Use(middleware.StripSlashes)
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
+	r.Use(cors.Handler(cors.Options{AllowedOrigins: []string{"*"}}))
 	//r.Use(middleware.Compress(5))
 
 	r.Use(render.SetContentType(render.ContentTypeJSON))
