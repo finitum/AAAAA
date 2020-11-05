@@ -12,7 +12,7 @@ type PackageStore interface {
 	// GetPackage gets a package definition from the store MUST return ErrNotExists if the package does not exist
 	GetPackage(name string) (*models.Pkg, error)
 	AddPackage(pkg *models.Pkg) error
-	DelPackage(pkg *models.Pkg) error
+	DelPackage(name string) error
 	AllPackages() ([]*models.Pkg, error)
 	AllPackageNames() ([]string, error)
 }

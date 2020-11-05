@@ -65,3 +65,10 @@ func ErrExists() render.Renderer {
 		AppCode:        AppCodeAlreadyExists,
 	}
 }
+
+func ErrNotFound() render.Renderer {
+	return &ErrResponse{
+		HTTPStatusCode: http.StatusNotFound,
+		StatusText:     "Object not found",
+	}
+}
