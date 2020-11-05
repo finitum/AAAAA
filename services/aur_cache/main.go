@@ -32,11 +32,12 @@ func main() {
 	default:
 		fallthrough
 	case "ristretto":
-		var err error
-		cache, err = store.NewRistretto()
+		ristretto, err := store.NewRistretto()
 		if err != nil {
 			log.Fatalf("Couldn't open ristretto cache: %v", err)
 		}
+		defer ristretto.Close()
+		cache = ristretto
 	case "badger":
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
@@ -44,6 +45,7 @@ func main() {
 		if err != nil {
 			log.Fatalf("Couldn't open ristretto cache: %v", err)
 		}
+		defer badger.Close()
 		badger.StartGC(ctx)
 		cache = badger
 	}

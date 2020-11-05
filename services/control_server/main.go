@@ -25,6 +25,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Opening Badger store failed: %v", err)
 	}
+	defer db.Close()
 
 	tokenAuth := jwtauth.New(jwt.SigningMethodHS384.Name, []byte("change me"), nil)
 
