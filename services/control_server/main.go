@@ -20,6 +20,9 @@ import (
 
 func main() {
 	cfg := config.Default()
+	if err := cfg.CreateDirectories(); err != nil {
+		log.Fatalf("Couldn't create directories %v", err)
+	}
 
 	// Open Database
 	db, err := store.OpenBadgerStore(cfg.StoreLocation)
