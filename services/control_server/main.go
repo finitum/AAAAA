@@ -21,7 +21,7 @@ import (
 
 func main() {
 	// Open Database
-	db, err := store.OpenBadgerStore(os.TempDir() + "/AAAAA")
+	db, err := store.OpenBadger(os.TempDir() + "/AAAAA-store")
 	if err != nil {
 		log.Fatalf("Opening Badger store failed: %v", err)
 	}
