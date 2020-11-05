@@ -65,6 +65,7 @@ func main() {
 
 		r.Post("/user", rs.AddUser)
 		r.Post("/package", rs.AddPackage)
+		r.Delete("/package/{pkg}", rs.RemovePackage)
 
 		r.Post("/package/{pkg}", rs.UploadPackage)
 		r.Put("/package/{pkg}/build", rs.TriggerBuild)

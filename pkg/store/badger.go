@@ -60,9 +60,9 @@ func (b *Badger) AddPackage(pkg *models.Pkg) error {
 	})
 }
 
-func (b *Badger) DelPackage(pkg *models.Pkg) error {
+func (b *Badger) DelPackage(name string) error {
 	return b.db.Update(func(txn *badger.Txn) error {
-		return errors.Wrap(txn.Delete([]byte(pkgPrefix+pkg.Name)), "badger transaction")
+		return errors.Wrap(txn.Delete([]byte(pkgPrefix+name)), "badger transaction")
 	})
 }
 

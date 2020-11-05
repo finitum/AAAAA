@@ -60,6 +60,21 @@ func (rs *Routes) AddPackage(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 }
 
+func (rs *Routes) RemovePackage(w http.ResponseWriter, r *http.Request) {
+	pkgName := chi.URLParam(r, "pkg")
+
+	_, err := rs.db.GetPackage(pkgName)
+	if err == store.ErrNotExists {
+		_ = render.Render(w, r, ErrNotFound())
+		return
+	}
+
+	if err := rs.db.DelPackage(pkgName); err != nil {
+		_ = render.Render(w, r, ErrServerError(err))
+		return
+	}
+}
+
 func (rs *Routes) TriggerBuild(w http.ResponseWriter, r *http.Request) {
 	pkgName := chi.URLParam(r, "pkg")
 

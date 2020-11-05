@@ -31,7 +31,7 @@ func TestBadger_AddGetDelPackage(t *testing.T) {
 
 	assert.Equal(t, &tstPkg, res)
 
-	assert.NoError(t, store.DelPackage(&tstPkg))
+	assert.NoError(t, store.DelPackage(tstPkg.Name))
 
 	assert.NoError(t, os.RemoveAll(storePath))
 }
