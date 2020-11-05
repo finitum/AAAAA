@@ -2,6 +2,7 @@ package store
 
 import (
 	"errors"
+	"github.com/finitum/AAAAA/pkg/aur"
 	"github.com/finitum/AAAAA/pkg/models"
 )
 
@@ -21,6 +22,11 @@ type UserStore interface {
 	AddUser(user *models.User) error
 	DelUser(user *models.User) error
 	AllUserNames() ([]string, error)
+}
+
+type Cache interface {
+	SetEntry(searchterm string, result aur.Results) error
+	GetEntry(searchterm string) (aur.Results, bool, error)
 }
 
 type Store interface {
