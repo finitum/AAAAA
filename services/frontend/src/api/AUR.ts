@@ -1,5 +1,6 @@
 import axios from "axios";
 import { notificationState } from "@/components/NotificationState";
+import {NewPackage, Package} from "@/api/Models";
 
 export interface Result {
   ID: number;
@@ -16,6 +17,40 @@ export interface Result {
   FirstSubmitted: number;
   LastModified: number;
   URLPath: string;
+}
+
+export function ToPackage(result: Result | undefined): Package {
+  if (typeof result === "undefined") {
+    return NewPackage()
+  }
+
+  return {
+    KeepLastN: 2,
+    LastHash: "",
+    Name: result.Name,
+    RepoBranch: "master",
+    RepoURL: `https://aur.archlinux.org/${result.Name}.git`,
+    UpdateFrequency: 2 * 3600 * 1000 * 1000 * 1000
+  }
+}
+
+export function NewResult(): Result {
+  return {
+    Description: "",
+    FirstSubmitted: 0,
+    ID: 0,
+    LastModified: 0,
+    Maintainer: "",
+    Name: "",
+    NumVotes: 0,
+    OutOfDate: null,
+    PackageBase: "",
+    PackageBaseID: 0,
+    Popularity: 0,
+    URL: "",
+    URLPath: "",
+    Version: ""
+  }
 }
 
 export interface Results {

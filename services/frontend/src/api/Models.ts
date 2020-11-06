@@ -15,6 +15,10 @@ export interface Package {
   UpdateFrequency: number;
 }
 
+export function NewPackage(): Package{
+  return {KeepLastN: 2, LastHash: "", Name: "", RepoBranch: "", RepoURL: "", UpdateFrequency: 0}
+}
+
 export function frequencyToDuration(freqns: number): string {
   return humanizeDuration(freqns / 1000 / 1000);
 }

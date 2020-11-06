@@ -21,6 +21,9 @@ import Search from "@/components/Search.vue";
 
 export default defineComponent({
   name: "Home",
-  components: { PackageTable, Search }
+  components: { PackageTable, Search },
+  setup() {
+    return {};
+  }
 });
 </script>
