@@ -23,8 +23,8 @@ type PackageStore interface {
 	// AddPackage add a package to the store
 	AddPackage(pkg *models.Pkg) error
 	// DelPackage remove a package from the store
-	DelPackage(pkg *models.Pkg) error
-	// AllPackages lists all packages inside the store
+	DelPackage(name string) error
+  // AllPackages lists all packages inside the store
 	AllPackages() ([]*models.Pkg, error)
 	// AllPackageNames lists the names of all the packages in the store
 	AllPackageNames() ([]string, error)
