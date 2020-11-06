@@ -6,43 +6,11 @@ import (
 	"github.com/dgraph-io/badger/v2"
 	"github.com/finitum/AAAAA/pkg/aur"
 	"github.com/pkg/errors"
-	log "github.com/sirupsen/logrus"
-	"time"
 )
 
-type BadgerCache struct {
-	db *badger.DB
-}
-
 const cachePrefix = "cache_"
-const cacheTTL = 30 * time.Minute
-const gcTime = 5 * time.Minute
 
-func OpenBadgerCache(path string) (*BadgerCache, error) {
-	db, err := badger.Open(badger.DefaultOptions(path + ".cache"))
-	if err != nil {
-		return nil, errors.Wrap(err, "opening badger store")
-	}
-
-	go func() {
-		ticker := time.NewTicker(gcTime)
-		defer ticker.Stop()
-		for range ticker.C {
-		again:
-			log.Debug("Garbage collection started")
-			err := db.RunValueLogGC(0.7)
-			if err == nil {
-				goto again
-			}
-		}
-	}()
-
-	return &BadgerCache{
-		db,
-	}, nil
-}
-
-func (b *BadgerCache) SetEntry(searchterm string, result aur.Results) error {
+func (b *Badger) SetEntry(searchterm string, result aur.Results) error {
 	return b.db.Update(func(txn *badger.Txn) error {
 		var value bytes.Buffer
 
@@ -64,41 +32,20 @@ func (b *BadgerCache) SetEntry(searchterm string, result aur.Results) error {
 	})
 }
 
-func (b *BadgerCache) GetEntry(searchterm string) (aur.Results, bool, error) {
-	var result aur.Results
-	exact := true
-
-	err := b.db.View(func(txn *badger.Txn) error {
-		// Add all the smaller strings to the database as well, to ensure a quicker lookup
-		for i := len(searchterm); i > 2; i-- {
-			actualSearchterm := []byte(cachePrefix + searchterm[:i])
-
-			// Get a value from the store. This may be a pointer to another key
-			item, err := txn.Get(actualSearchterm)
-			if err == badger.ErrKeyNotFound {
-				// After the first iteration it's not exact anymore
-				exact = false
-				continue
-			} else if err != nil {
-				return errors.Wrap(err, "badger get")
-			}
-
-			err = item.Value(func(val []byte) error {
-				buf := bytes.NewBuffer(val)
-
-				dec := gob.NewDecoder(buf)
-				return errors.Wrap(dec.Decode(&result), "gob decode")
-			})
-
-			return errors.Wrap(err, "badger read")
+func (b *Badger) GetEntry(term string) (result aur.Results, _ error) {
+	return result, b.db.View(func(txn *badger.Txn) error {
+		item, err := txn.Get([]byte(cachePrefix + term))
+		if err == badger.ErrKeyNotFound {
+			return ErrNotExists
+		} else if err != nil {
+			return errors.Wrap(err, "badger get")
 		}
 
-		return ErrNotExists
+		return item.Value(func(val []byte) error {
+			buf := bytes.NewBuffer(val)
+
+			dec := gob.NewDecoder(buf)
+			return errors.Wrap(dec.Decode(&result), "gob decode")
+		})
 	})
-
-	if err != nil {
-		return nil, false, err
-	}
-
-	return result, exact, err
 }

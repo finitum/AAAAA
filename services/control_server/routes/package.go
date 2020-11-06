@@ -60,6 +60,21 @@ func (rs *Routes) AddPackage(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 }
 
+func (rs *Routes) RemovePackage(w http.ResponseWriter, r *http.Request) {
+	pkgName := chi.URLParam(r, "pkg")
+
+	_, err := rs.db.GetPackage(pkgName)
+	if err == store.ErrNotExists {
+		_ = render.Render(w, r, ErrNotFound())
+		return
+	}
+
+	if err := rs.db.DelPackage(pkgName); err != nil {
+		_ = render.Render(w, r, ErrServerError(err))
+		return
+	}
+}
+
 func (rs *Routes) TriggerBuild(w http.ResponseWriter, r *http.Request) {
 	pkgName := chi.URLParam(r, "pkg")
 
@@ -84,16 +99,17 @@ func (rs *Routes) TriggerBuild(w http.ResponseWriter, r *http.Request) {
 			log.Warnf("trigger prepare build %v", err)
 		}
 
-		// TODO URLs
 		if err := rs.exec.BuildPackage(ctx, &executor.Config{
 			Package:   pkg,
 			Token:     tokenStr,
-			UploadURL: "http://192.168.0.150:5000/package",
+			UploadURL: rs.cfg.ExternalAddress + "/package",
 		}); err != nil {
 			log.Warnf("trigger build %v", err)
 			return
 		}
 	}()
+
+	w.WriteHeader(http.StatusAccepted)
 }
 
 func (rs *Routes) UploadPackage(w http.ResponseWriter, r *http.Request) {
@@ -119,7 +135,7 @@ func (rs *Routes) UploadPackage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Download file
-	pkgPath := "./AAAAA/repo/" + filename
+	pkgPath := rs.cfg.RepoLocation + "/" + filename
 	if externalUrl == "" {
 		file, err := os.Create(pkgPath)
 		if err != nil {
@@ -146,7 +162,7 @@ func (rs *Routes) UploadPackage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// TODO: fix
-	ra, err := repo_add.NewRepoAdd("./AAAAA")
+	ra, err := repo_add.NewRepoAdd(rs.cfg.RepoLocation)
 	if err != nil {
 		_ = render.Render(w, r, ErrServerError(err))
 		log.Warnf("UploadPackage repo add failed: %v", err)

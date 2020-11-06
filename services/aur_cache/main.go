@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/finitum/AAAAA/pkg/aur"
@@ -24,9 +25,29 @@ func main() {
 	r.Use(cors.Handler(cors.Options{AllowedOrigins: []string{"*"}}))
 	r.Use(render.SetContentType(render.ContentTypeJSON))
 
-	cache, err := store.OpenBadgerCache(os.TempDir() + "/AAAAA")
-	if err != nil {
-		log.Fatalf("Couldn't open store (%v)", err)
+	cachetype := os.Getenv("CACHE_TYPE")
+	var cache store.Cache
+
+	switch strings.ToLower(cachetype) {
+	default:
+		fallthrough
+	case "ristretto":
+		ristretto, err := store.NewRistretto()
+		if err != nil {
+			log.Fatalf("Couldn't open ristretto cache: %v", err)
+		}
+		defer ristretto.Close()
+		cache = ristretto
+	case "badger":
+		ctx, cancel := context.WithCancel(context.Background())
+		defer cancel()
+		badger, err := store.OpenBadger(os.TempDir() + "/AAAAA-cache")
+		if err != nil {
+			log.Fatalf("Couldn't open ristretto cache: %v", err)
+		}
+		defer badger.Close()
+		badger.StartGC(ctx)
+		cache = badger
 	}
 
 	r.Get("/search/{term}", proxy(cache))
@@ -45,7 +66,7 @@ func proxy(cache store.Cache) http.HandlerFunc {
 			return
 		}
 
-		cachedResult, exact, err := cache.GetEntry(term)
+		cachedResult, exact, err := store.GetPartialCacheEntry(cache, term)
 		if err == nil {
 			log.Trace("Cache hit!")
 			if exact {

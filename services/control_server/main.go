@@ -8,6 +8,7 @@ import (
 	"github.com/finitum/AAAAA/pkg/executor"
 	"github.com/finitum/AAAAA/pkg/models"
 	"github.com/finitum/AAAAA/pkg/store"
+	"github.com/finitum/AAAAA/services/control_server/config"
 	"github.com/finitum/AAAAA/services/control_server/routes"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
@@ -16,17 +17,22 @@ import (
 	"github.com/go-chi/render"
 	log "github.com/sirupsen/logrus"
 	"net/http"
-	"os"
 )
 
 func main() {
+	cfg := config.Default()
+	if err := cfg.CreateDirectories(); err != nil {
+		log.Fatalf("Couldn't create directories %v", err)
+	}
+
 	// Open Database
-	db, err := store.OpenBadgerStore(os.TempDir() + "/AAAAA")
+	db, err := store.OpenBadger(cfg.StoreLocation)
 	if err != nil {
 		log.Fatalf("Opening Badger store failed: %v", err)
 	}
+	defer db.Close()
 
-	tokenAuth := jwtauth.New(jwt.SigningMethodHS384.Name, []byte("change me"), nil)
+	tokenAuth := jwtauth.New(jwt.SigningMethodHS384.Name, []byte(cfg.JWTKey), nil)
 
 	// Auth service
 	auths := auth.NewStoreAuth(db, tokenAuth)
@@ -34,14 +40,14 @@ func main() {
 	// Create initial user
 	initialUser(db, auths)
 
-	// Exec
-	exec, err := executor.NewDockerExecutor("aaaaa-builder")
+	// Executor
+	exec, err := executor.NewDockerExecutor(cfg.RunnerImage)
 	if err != nil {
 		log.Fatalf("Starting docker executor failed: %v", err)
 	}
 
 	// Router
-	rs := routes.New(db, auths, exec)
+	rs := routes.New(cfg, db, auths, exec)
 
 	r := chi.NewRouter()
 	r.Use(middleware.StripSlashes)
@@ -67,12 +73,13 @@ func main() {
 
 		r.Post("/user", rs.AddUser)
 		r.Post("/package", rs.AddPackage)
+		r.Delete("/package/{pkg}", rs.RemovePackage)
 
 		r.Post("/package/{pkg}", rs.UploadPackage)
 		r.Put("/package/{pkg}/build", rs.TriggerBuild)
 	})
 
-	log.Fatal(http.ListenAndServe(":5000", r))
+	log.Fatal(http.ListenAndServe(cfg.Address, r))
 }
 
 func initialUser(db store.Store, auths auth.AuthenticationService) {

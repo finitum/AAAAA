@@ -20,7 +20,7 @@ func TestBadger_AddGetDelPackage(t *testing.T) {
 	}
 
 	storePath := os.TempDir() + "/TestBadger_AddPackage"
-	store, err := OpenBadgerStore(storePath)
+	store, err := OpenBadger(storePath)
 	assert.NoError(t, err)
 
 	err = store.AddPackage(&tstPkg)
@@ -31,7 +31,7 @@ func TestBadger_AddGetDelPackage(t *testing.T) {
 
 	assert.Equal(t, &tstPkg, res)
 
-	assert.NoError(t, store.DelPackage(&tstPkg))
+	assert.NoError(t, store.DelPackage(tstPkg.Name))
 
 	assert.NoError(t, os.RemoveAll(storePath))
 }
@@ -56,7 +56,7 @@ func TestBadger_AllPackages(t *testing.T) {
 	}
 
 	storePath := os.TempDir() + "/TestBadger_AllPackages"
-	store, err := OpenBadgerStore(storePath)
+	store, err := OpenBadger(storePath)
 	assert.NoError(t, err)
 
 	assert.NoError(t, store.AddPackage(&tstPkg))
@@ -84,7 +84,7 @@ func TestBadger_AddGetDelUser(t *testing.T) {
 	}
 
 	storePath := os.TempDir() + "/TestBadger_AddUser"
-	store, err := OpenBadgerStore(storePath)
+	store, err := OpenBadger(storePath)
 	assert.NoError(t, err)
 
 	err = store.AddUser(&tstUser)
@@ -111,7 +111,7 @@ func TestBadger_AllUserNames(t *testing.T) {
 	}
 
 	storePath := os.TempDir() + "/TestBadger_AllUserNames"
-	store, err := OpenBadgerStore(storePath)
+	store, err := OpenBadger(storePath)
 	assert.NoError(t, err)
 
 	assert.NoError(t, store.AddUser(&tstUser))
