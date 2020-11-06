@@ -10,6 +10,7 @@ import (
 
 const gcTime = 5 * time.Minute
 
+// Badger is a Store based on dgraph's badger
 type Badger struct {
 	db *badger.DB
 }
@@ -19,6 +20,7 @@ func OpenBadger(path string) (*Badger, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "opening badger store")
 	}
+
 	return &Badger{
 		db,
 	}, nil
@@ -43,4 +45,8 @@ func (b *Badger) StartGC(ctx context.Context) {
 			}
 		}
 	}()
+}
+
+func (b *Badger) Close() error {
+	return errors.Wrap(b.db.Close(), "closing badger")
 }
