@@ -1,7 +1,7 @@
 import axios from "axios";
 import { Package, User } from "@/api/Models";
 import { notificationState } from "@/components/NotificationState";
-import { ref } from "vue"
+import { ref } from "vue";
 
 const client = axios.create({
   baseURL: "http://localhost:5000",
@@ -10,7 +10,7 @@ const client = axios.create({
   }
 });
 
-export const loggedIn = ref(false)
+export const loggedIn = ref(false);
 let token: string | null = null;
 
 // Authorization interceptor
@@ -50,10 +50,17 @@ export function logOut() {
   loggedIn.value = false;
 }
 
-export async function AddPackage(pkg: Package): Promise<void> {
+export async function AddPackage(pkg: Package, localToken?: string): Promise<void> {
+  const originalToken = token;
+  if (typeof localToken !== "undefined") {
+    token = localToken
+  }
+
   if (token == null) {
     return Promise.reject("null token");
   }
 
-  return client.post("/package", pkg);
+  return client.post("/package", pkg).then(() => {
+    token = originalToken;
+  });
 }

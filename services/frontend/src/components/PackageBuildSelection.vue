@@ -1,31 +1,63 @@
 <template>
   <div
-          class="fixed z-10 inset-0 overflow-y-auto flex justify-center items-center"
+    class="fixed z-10 inset-0 overflow-y-auto flex justify-center items-center"
   >
     <div class="fixed inset-0 transition-opacity">
       <div
-              class="absolute inset-0 bg-gray-500 opacity-75"
-              @click="$emit('close')"
+        class="absolute inset-0 bg-gray-500 opacity-75"
+        @click="$emit('close')"
       ></div>
     </div>
-    <div class="bg-white z-20 text-center p-2 my-5 shadow-md rounded grid grid-cols-4 auto-cols-fr gap-8 lg:w-1/2 w-full">
-      <h1 class="col-span-full text-3xl font-semibold">{{pkg.Name}}</h1>
+    <div
+      class="bg-white z-20 text-center p-2 my-5 shadow-md rounded grid grid-cols-4 auto-cols-fr gap-8 lg:w-1/2 w-full"
+    >
+      <h1 class="col-span-full text-3xl font-semibold">{{ pkg.Name }}</h1>
 
       <label for="name" class="label">Package Name:</label>
-      <input id="name" v-model="pkg.Name" :disabled="!externalPackage" class="input" required/>
+      <input
+        id="name"
+        v-model="pkg.Name"
+        :disabled="!externalPackage"
+        class="input"
+        required
+      />
 
       <label for="repourl" class="label">Repository URL:</label>
-      <input id="repourl" v-model="pkg.RepoURL" :disabled="!externalPackage" class="input" required/>
+      <input
+        id="repourl"
+        v-model="pkg.RepoURL"
+        :disabled="!externalPackage"
+        class="input"
+        required
+      />
 
       <label for="branch" class="label">Repository Branch:</label>
-      <input id="branch" v-model="pkg.RepoBranch" :disabled="!externalPackage" class="input" required/>
-
+      <input
+        id="branch"
+        v-model="pkg.RepoBranch"
+        :disabled="!externalPackage"
+        class="input"
+        required
+      />
 
       <label for="duration" class="label">Update frequency: </label>
-      <DurationPicker id="duration" class="col-span-3" v-model="pkg.UpdateFrequency" />
+      <DurationPicker
+        id="duration"
+        class="col-span-3"
+        v-model="pkg.UpdateFrequency"
+      />
 
       <label for="lastn" class="label">Keep last:</label>
-      <input id="lastn" type=number v-model="pkg.KeepLastN" @focusout="focusOut" class="input" min=1 @focus="$event.target.select()" required/>
+      <input
+        id="lastn"
+        type="number"
+        v-model="pkg.KeepLastN"
+        @focusout="focusOut"
+        class="input"
+        min="1"
+        @focus="$event.target.select()"
+        required
+      />
 
       <button class="col-span-full" @click="submitPackage">Add Package</button>
     </div>
@@ -35,27 +67,27 @@
 <script lang="ts">
 import { defineComponent, PropType, ref, onMounted } from "vue";
 import DurationPicker from "@/components/DurationPicker.vue";
-import {NewPackage, Package} from "@/api/Models";
-import {AddPackage} from "@/api/API";
+import { NewPackage, Package } from "@/api/Models";
+import { AddPackage } from "@/api/API";
 
 export default defineComponent({
   name: "PackageBuildSelection",
-  components: {DurationPicker},
+  components: { DurationPicker },
 
   props: {
     pkgprop: {
       type: Object as PropType<Package>,
-      required: true,
+      required: true
     }
   },
 
-  setup(props, {emit}) {
-    const pkg = ref(NewPackage())
-    const externalPackage = ref(false)
+  setup(props, { emit }) {
+    const pkg = ref(NewPackage());
+    const externalPackage = ref(false);
 
     onMounted(() => {
-      pkg.value = props.pkgprop
-    })
+      pkg.value = props.pkgprop;
+    });
 
     function focusOut(e: Event) {
       if ((e.target as HTMLInputElement).value === "") {
@@ -64,8 +96,7 @@ export default defineComponent({
     }
 
     function submitPackage() {
-      AddPackage(pkg.value)
-      .then(() => emit("close"))
+      AddPackage(pkg.value).then(() => emit("close"));
     }
 
     return {
@@ -94,5 +125,4 @@ button {
 .label {
   @apply col-span-1 text-center block pt-1;
 }
-
 </style>

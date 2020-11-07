@@ -39,7 +39,11 @@
       </div>
     </div>
 
-    <PackageBuildSelection v-if="showPackageBuildSelection" :pkgprop="ToPackage(selected)" @close="showPackageBuildSelection=false" />
+    <PackageBuildSelection
+      v-if="showPackageBuildSelection"
+      :pkgprop="ToPackage(selected)"
+      @close="showPackageBuildSelection = false"
+    />
   </div>
 </template>
 
@@ -69,7 +73,7 @@ export default defineComponent({
       }
 
       if (index === -1) {
-        return
+        return;
       }
 
       switch (event.key) {
@@ -99,7 +103,7 @@ export default defineComponent({
 
     function addPackage() {
       showPackageBuildSelection.value = true;
-      showResults.value = false
+      showResults.value = false;
     }
 
     function onInput() {
@@ -110,10 +114,13 @@ export default defineComponent({
     }
 
     function doFocusOut(e: FocusEvent) {
-      if (e.relatedTarget !== null && (e.relatedTarget as HTMLElement).classList.contains("dropdown")) {
-          return
+      if (
+        e.relatedTarget !== null &&
+        (e.relatedTarget as HTMLElement).classList.contains("dropdown")
+      ) {
+        return;
       }
-      showResults.value = false
+      showResults.value = false;
     }
 
     return {
@@ -126,7 +133,7 @@ export default defineComponent({
       doFocusOut,
       showResults,
       showPackageBuildSelection,
-      ToPackage,
+      ToPackage
     };
   }
 });

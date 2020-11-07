@@ -1,5 +1,5 @@
 <template>
-  <Header @login="showLogin = true"/>
+  <Header @login="showLogin = true" />
   <router-view />
   <Login v-if="showLogin" @close="showLogin = false" />
   <Notification />

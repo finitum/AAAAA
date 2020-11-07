@@ -1,4 +1,4 @@
-import { GetPackages, Login } from "./API";
+import {AddPackage, GetPackages, Login} from "./API";
 import { Package, User } from "@/api/Models";
 import mockAxios from "jest-mock-axios";
 
@@ -8,6 +8,26 @@ afterEach(() => {
 });
 
 describe("#API", () => {
+  it("Should be able to handle a normal response", async () => {
+    const pkg: Package = {
+      Name: "string",
+      RepoURL: "string",
+      RepoBranch: "string",
+      KeepLastN: 2,
+      LastHash: [],
+      UpdateFrequency: 5
+    };
+
+
+    const promise = AddPackage(pkg, "");
+
+    expect(mockAxios.post).toHaveBeenCalledWith("/package", pkg);
+
+
+    mockAxios.mockResponse({ data: {}, status: 201});
+
+    await promise;
+  });
   it("Should be able to handle a normal response", async () => {
     const promise = GetPackages();
 
@@ -19,7 +39,7 @@ describe("#API", () => {
         RepoURL: "string",
         RepoBranch: "string",
         KeepLastN: 2,
-        LastHash: "string",
+        LastHash: [],
         UpdateFrequency: 5
       }
     ];

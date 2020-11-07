@@ -1,6 +1,6 @@
 import axios from "axios";
 import { notificationState } from "@/components/NotificationState";
-import {NewPackage, Package} from "@/api/Models";
+import { NewPackage, Package } from "@/api/Models";
 
 export interface Result {
   ID: number;
@@ -20,9 +20,8 @@ export interface Result {
 }
 
 export function ToPackage(result: Result | undefined): Package {
-
   if (typeof result === "undefined") {
-    return NewPackage()
+    return NewPackage();
   }
 
   return {
@@ -32,7 +31,7 @@ export function ToPackage(result: Result | undefined): Package {
     RepoBranch: "master",
     RepoURL: `https://aur.archlinux.org/${result.Name}.git`,
     UpdateFrequency: 2 * 3600 * 1000 * 1000 * 1000
-  }
+  };
 }
 
 export function NewResult(): Result {
@@ -51,7 +50,7 @@ export function NewResult(): Result {
     URL: "",
     URLPath: "",
     Version: ""
-  }
+  };
 }
 
 export interface Results {
