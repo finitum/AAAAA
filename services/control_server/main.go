@@ -2,6 +2,7 @@ package main
 
 import (
 	"crypto/rand"
+	"encoding/base64"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/finitum/AAAAA/pkg/auth"
 	"github.com/finitum/AAAAA/pkg/executor"
@@ -108,8 +109,7 @@ func initialUser(db store.Store, auths auth.AuthenticationService) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	//pass := base64.StdEncoding.EncodeToString(buf)
-	pass := "admin"
+	pass := base64.StdEncoding.EncodeToString(buf)
 
 	if err := auths.Register(&models.User{
 		Username: "admin",
