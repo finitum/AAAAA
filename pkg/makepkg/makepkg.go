@@ -17,6 +17,7 @@ func Build() error {
 		"PKGEXT="+".pkg.tar.zst",
 	)
 
+	// TODO: don't use error pipes
 	errp, err := cmd.StderrPipe()
 	if err != nil {
 		return err

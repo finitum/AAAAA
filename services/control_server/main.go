@@ -20,7 +20,7 @@ import (
 )
 
 func main() {
-	cfg := config.Default()
+	cfg := config.DevDefault()
 	if err := cfg.CreateDirectories(); err != nil {
 		log.Fatalf("Couldn't create directories %v", err)
 	}
@@ -41,9 +41,17 @@ func main() {
 	initialUser(db, auths)
 
 	// Executor
-	exec, err := executor.NewDockerExecutor(cfg.RunnerImage)
+	var exec executor.Executor
+	switch cfg.Executor {
+	default:
+		fallthrough
+	case "docker":
+		exec, err = executor.NewDockerExecutor(cfg.RunnerImage)
+	case "kubernetes":
+		exec, err = executor.NewKubernetesExecutor(cfg.RunnerImage, cfg.KubeNamespace, cfg.KubeConfigPath)
+	}
 	if err != nil {
-		log.Fatalf("Starting docker executor failed: %v", err)
+		log.Fatalf("Starting %s executor failed: %v", cfg.Executor, err)
 	}
 
 	// Router

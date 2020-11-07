@@ -1,6 +1,10 @@
 package config
 
-import "os"
+import (
+	log "github.com/sirupsen/logrus"
+	"os"
+	"path"
+)
 
 // Config is the configuration used by the control server
 type Config struct {
@@ -16,18 +20,34 @@ type Config struct {
 	Address string
 	// ExternalAddress the address which is externally reachable (used for the runner amongst others
 	ExternalAddress string
+	// Executor determines where packages are built can be either 'docker' or 'kubernetes'
+	Executor string
+	// KubeConfigPath points to a kube config if using the kubernetes executor in external mode, leave empty for internal mode
+	KubeConfigPath string `json:",omitempty"`
+	// KubeNamespace is the namespace in which the kubernetes jobs should be ran, defaults to kubernetes' default
+	KubeNamespace string `json:",omitempty"`
 }
 
-// Default returns a default set of config values which generally work for local development
-func Default() *Config {
+// DevDefault returns a default set of config values which generally work for local development
+func DevDefault() *Config {
 	root := "./AAAAA/"
+
+	homedir, err := os.UserHomeDir()
+	if err != nil {
+		log.Warnf("Couldn't get user's homedir %v", err)
+		homedir = root
+	}
+
 	return &Config{
 		StoreLocation:   root + "store",
 		RepoLocation:    root + "repo",
-		RunnerImage:     "aaaaa-builder",
+		RunnerImage:     "harbor.xirion.net/library/aaaaa-builder",
 		JWTKey:          "change-me",
 		Address:         "0.0.0.0:5000",
 		ExternalAddress: "0.0.0.0:5000",
+		Executor:        "docker",
+		KubeConfigPath:  path.Join(homedir, ".kube", "config"),
+		KubeNamespace:   "",
 	}
 }
 

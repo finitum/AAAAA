@@ -20,7 +20,7 @@ type DockerExecutor struct {
 }
 
 func NewDockerExecutor(runnerImage string) (*DockerExecutor, error) {
-	cli, err := client.NewEnvClient()
+	cli, err := client.NewClientWithOpts(client.FromEnv)
 	if err != nil {
 		return nil, errors.Wrap(err, "creating docker env client")
 	}
