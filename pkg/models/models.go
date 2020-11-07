@@ -18,7 +18,7 @@ type Pkg struct {
 	// KeepLastN determines how many old versions of packages are kept
 	KeepLastN int
 	// LastHash is the latest SHA1 retrieved from the package repo
-	LastHash plumbing.Hash
+	LastHash plumbing.Hash `json:",omitempty"`
 	// UpdateFrequency determines how often the package should be updated
 	UpdateFrequency time.Duration
 

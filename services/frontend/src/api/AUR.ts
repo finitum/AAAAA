@@ -20,13 +20,14 @@ export interface Result {
 }
 
 export function ToPackage(result: Result | undefined): Package {
+
   if (typeof result === "undefined") {
     return NewPackage()
   }
 
   return {
     KeepLastN: 2,
-    LastHash: "",
+    LastHash: [],
     Name: result.Name,
     RepoBranch: "master",
     RepoURL: `https://aur.archlinux.org/${result.Name}.git`,

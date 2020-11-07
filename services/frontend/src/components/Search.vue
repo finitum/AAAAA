@@ -39,13 +39,13 @@
       </div>
     </div>
 
-    <PackageBuildSelection v-show="showPackageBuildSelection" :result="selected" @close="showPackageBuildSelection=false" />
+    <PackageBuildSelection v-if="showPackageBuildSelection" :pkgprop="ToPackage(selected)" @close="showPackageBuildSelection=false" />
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, reactive, ref } from "vue";
-import { Result, search, NewResult } from "@/api/AUR";
+import { ToPackage, Result, search, NewResult } from "@/api/AUR";
 import PackageBuildSelection from "@/components/PackageBuildSelection.vue";
 
 export default defineComponent({
@@ -59,8 +59,6 @@ export default defineComponent({
     const showPackageBuildSelection = ref(false);
 
     function onKeySearch(event: KeyboardEvent) {
-      console.log(event);
-
       let index = -1;
 
       for (let i = 0; i < results.length - 1; i++) {
@@ -128,6 +126,7 @@ export default defineComponent({
       doFocusOut,
       showResults,
       showPackageBuildSelection,
+      ToPackage,
     };
   }
 });

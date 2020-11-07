@@ -10,13 +10,13 @@ export interface Package {
   // KeepLastN determines how many old versions of packages are kept
   KeepLastN: number;
   // LastHash is the latest SHA1 retrieved from the package repo
-  LastHash: string;
+  LastHash: number[];
   // UpdateFrequency determines how often the package should be updated
   UpdateFrequency: number;
 }
 
 export function NewPackage(): Package{
-  return {KeepLastN: 2, LastHash: "", Name: "", RepoBranch: "", RepoURL: "", UpdateFrequency: 0}
+  return {KeepLastN: 2, LastHash: [], Name: "", RepoBranch: "", RepoURL: "", UpdateFrequency: 0}
 }
 
 export function frequencyToDuration(freqns: number): string {

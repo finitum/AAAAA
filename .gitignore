@@ -141,5 +141,7 @@ tags
 # Persistent undo
 [._]*.un~
 
+AAAAA
+
 # End of https://www.toptal.com/developers/gitignore/api/go,jetbrains+all,code,vim
 

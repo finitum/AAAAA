@@ -2,7 +2,6 @@ package main
 
 import (
 	"crypto/rand"
-	"encoding/base64"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/finitum/AAAAA/pkg/auth"
 	"github.com/finitum/AAAAA/pkg/executor"
@@ -12,7 +11,6 @@ import (
 	"github.com/finitum/AAAAA/services/control_server/routes"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
-	"github.com/go-chi/cors"
 	"github.com/go-chi/jwtauth"
 	"github.com/go-chi/render"
 	log "github.com/sirupsen/logrus"
@@ -53,7 +51,18 @@ func main() {
 	r.Use(middleware.StripSlashes)
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
-	r.Use(cors.Handler(cors.Options{AllowedOrigins: []string{"*"}}))
+	r.Use(func (h http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Access-Control-Allow-Origin", "*")
+			w.Header().Set("Access-Control-Allow-Headers", "*")
+
+			if r.Method == http.MethodOptions {
+				return
+			}
+
+			h.ServeHTTP(w, r)
+		})
+	})
 	//r.Use(middleware.Compress(5))
 
 	r.Use(render.SetContentType(render.ContentTypeJSON))
@@ -70,9 +79,11 @@ func main() {
 
 		// Handle valid / invalid tokens.
 		r.Use(jwtauth.Authenticator)
+		//r.Use(corsHandler)
 
 		r.Post("/user", rs.AddUser)
 		r.Post("/package", rs.AddPackage)
+
 		r.Delete("/package/{pkg}", rs.RemovePackage)
 
 		r.Post("/package/{pkg}", rs.UploadPackage)
@@ -97,7 +108,8 @@ func initialUser(db store.Store, auths auth.AuthenticationService) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	pass := base64.StdEncoding.EncodeToString(buf)
+	//pass := base64.StdEncoding.EncodeToString(buf)
+	pass := "admin"
 
 	if err := auths.Register(&models.User{
 		Username: "admin",

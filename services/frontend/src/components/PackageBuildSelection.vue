@@ -5,44 +5,94 @@
     <div class="fixed inset-0 transition-opacity">
       <div
               class="absolute inset-0 bg-gray-500 opacity-75"
-              @click="log()"
+              @click="$emit('close')"
       ></div>
     </div>
-    <div class="bg-white z-20 text-center p-2 my-2 shadow-md rounded content flex flex-col items-center">
-      <h1>{{ package.Name }}</h1>
+    <div class="bg-white z-20 text-center p-2 my-5 shadow-md rounded grid grid-cols-4 auto-cols-fr gap-8 lg:w-1/2 w-full">
+      <h1 class="col-span-full text-3xl font-semibold">{{pkg.Name}}</h1>
 
-      <input value="{{pkg.Name}}" disabled>
-      <input value="{{pkg.RepoURL}}" disabled>
-      <input value="{{pkg.}}" disabled>
+      <label for="name" class="label">Package Name:</label>
+      <input id="name" v-model="pkg.Name" :disabled="!externalPackage" class="input" required/>
 
-      hello world!
+      <label for="repourl" class="label">Repository URL:</label>
+      <input id="repourl" v-model="pkg.RepoURL" :disabled="!externalPackage" class="input" required/>
+
+      <label for="branch" class="label">Repository Branch:</label>
+      <input id="branch" v-model="pkg.RepoBranch" :disabled="!externalPackage" class="input" required/>
+
+
+      <label for="duration" class="label">Update frequency: </label>
+      <DurationPicker id="duration" class="col-span-3" v-model="pkg.UpdateFrequency" />
+
+      <label for="lastn" class="label">Keep last:</label>
+      <input id="lastn" type=number v-model="pkg.KeepLastN" @focusout="focusOut" class="input" min=1 @focus="$event.target.select()" required/>
+
+      <button class="col-span-full" @click="submitPackage">Add Package</button>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, ref } from "vue";
-import {Result, ToPackage} from "@/api/AUR";
+import { defineComponent, PropType, ref, onMounted } from "vue";
+import DurationPicker from "@/components/DurationPicker.vue";
+import {NewPackage, Package} from "@/api/Models";
+import {AddPackage} from "@/api/API";
 
 export default defineComponent({
   name: "PackageBuildSelection",
+  components: {DurationPicker},
 
   props: {
-    result: Object as PropType<Result>
+    pkgprop: {
+      type: Object as PropType<Package>,
+      required: true,
+    }
   },
 
-  setup(props) {
-    const pkg = ref(ToPackage(props.result))
+  setup(props, {emit}) {
+    const pkg = ref(NewPackage())
+    const externalPackage = ref(false)
+
+    onMounted(() => {
+      pkg.value = props.pkgprop
+    })
+
+    function focusOut(e: Event) {
+      if ((e.target as HTMLInputElement).value === "") {
+        (e.target as HTMLInputElement).value = "1";
+      }
+    }
+
+    function submitPackage() {
+      AddPackage(pkg.value)
+      .then(() => emit("close"))
+    }
 
     return {
-      pkg
+      pkg,
+      focusOut,
+      externalPackage,
+      submitPackage
     };
   }
 });
 </script>
 
 <style lang="postcss" scoped>
-.button {
+button {
   @apply flex-shrink-0 bg-secondary text-sm text-white py-2 px-3 rounded;
 }
+
+.input {
+  @apply bg-gray-200 appearance-none border-2 border-gray-200 rounded py-2 px-4 text-gray-700 leading-tight col-span-3;
+
+  &:focus {
+    @apply outline-none bg-white border-secondary;
+  }
+}
+
+.label {
+  @apply col-span-1 text-center block pt-1;
+}
+
 </style>

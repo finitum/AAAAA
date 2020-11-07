@@ -8,7 +8,7 @@
         @click="$emit('close')"
       ></div>
     </div>
-    <div class="bg-white z-20 text-center p-2 my-2 shadow-md rounded content">
+    <div class="bg-white z-20 text-center p-2 my-2 shadow-md rounded">
       <div class="absolute cursor-pointer m-2" @click="$emit('close')">
         <svg
           class="fill-current text-black"
