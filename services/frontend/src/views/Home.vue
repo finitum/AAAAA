@@ -24,6 +24,7 @@ export default defineComponent({
   name: "Home",
   components: { PackageTable, Search },
   setup() {
+
     return { loggedIn };
   }
 });

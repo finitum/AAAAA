@@ -1,4 +1,10 @@
-import {AddPackage, DeletePackage, GetPackages, Login, UpdatePackage} from "./API";
+import {
+  AddPackage,
+  DeletePackage,
+  GetPackages,
+  Login,
+  UpdatePackage
+} from "./API";
 import { Package, User } from "@/api/Models";
 import mockAxios from "jest-mock-axios";
 
@@ -27,7 +33,7 @@ describe("#API", () => {
   });
 
   it("Should be able to delete a package", async () => {
-    const pkgName = "something"
+    const pkgName = "something";
 
     const promise = DeletePackage(pkgName, "");
 

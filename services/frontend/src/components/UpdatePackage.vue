@@ -15,20 +15,14 @@
       <h1 class="col-span-full text-3xl font-semibold">{{ pkg.Name }}</h1>
 
       <label for="name" class="label">Package Name:</label>
-      <input
-        id="name"
-        v-model="pkg.Name"
-        :disabled="!externalPackage"
-        class="input"
-        required
-      />
+      <input id="name" v-model="pkg.Name" disabled class="input" required />
 
       <label for="repourl" class="label">Repository URL:</label>
       <input
         id="repourl"
         v-model="pkg.RepoURL"
-        :disabled="!externalPackage"
         class="input"
+        :disabled="!external"
         required
       />
 
@@ -36,7 +30,7 @@
       <input
         id="branch"
         v-model="pkg.RepoBranch"
-        :disabled="!externalPackage"
+        :disabled="!external"
         class="input"
         required
       />
@@ -69,10 +63,11 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, ref, onMounted } from "vue";
+import { defineComponent, PropType, ref, onMounted, onUnmounted } from "vue";
 import DurationPicker from "@/components/DurationPicker.vue";
 import { NewPackage, Package } from "@/api/Models";
 import { AddPackage, UpdatePackage } from "@/api/API";
+import {packages} from "@/api/packages";
 
 export default defineComponent({
   name: "UpdatePackage",
@@ -86,16 +81,29 @@ export default defineComponent({
     mode: {
       type: String as PropType<"update" | "add">,
       required: true
+    },
+    external: {
+      type: Boolean,
+      default: false
     }
   },
 
   setup(props, { emit }) {
     const pkg = ref(NewPackage());
-    const externalPackage = ref(false);
+
+    function escapeHandler(e: KeyboardEvent) {
+      if (e.key === "Escape") {
+        emit("close");
+      }
+    }
 
     onMounted(() => {
-      5;
       pkg.value = props.pkgprop;
+      window.addEventListener("keydown", escapeHandler);
+    });
+
+    onUnmounted(() => {
+      window.removeEventListener("keydown", escapeHandler);
     });
 
     function focusOut(e: Event) {
@@ -110,14 +118,16 @@ export default defineComponent({
       if (props.mode === "update") {
         UpdatePackage(pkg.value).then(() => emit("close"));
       } else {
-        AddPackage(pkg.value).then(() => emit("close"));
+        AddPackage(pkg.value).then(() => emit("close"))
+          .then(() => {
+            packages.push(pkg.value);
+          });
       }
     }
 
     return {
       pkg,
       focusOut,
-      externalPackage,
       addOrUpdatePackage
     };
   }

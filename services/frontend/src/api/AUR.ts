@@ -19,18 +19,23 @@ export interface Result {
   URLPath: string;
 }
 
-export function ToPackage(result: Result | undefined): Package {
+export function ToPackage(
+  result: Result | undefined,
+  keepUrl: boolean
+): Package {
   if (typeof result === "undefined") {
     return NewPackage();
+  } else {
+    return {
+      KeepLastN: 2,
+      Name: result.Name,
+      RepoBranch: "master",
+      RepoURL: keepUrl
+        ? result.URL
+        : `https://aur.archlinux.org/${result.Name}.git`,
+      UpdateFrequency: 2 * 3600 * 1000 * 1000 * 1000
+    };
   }
-
-  return {
-    KeepLastN: 2,
-    Name: result.Name,
-    RepoBranch: "master",
-    RepoURL: `https://aur.archlinux.org/${result.Name}.git`,
-    UpdateFrequency: 2 * 3600 * 1000 * 1000 * 1000
-  };
 }
 
 export function NewResult(): Result {

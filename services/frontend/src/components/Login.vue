@@ -52,7 +52,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive } from "vue";
+import { defineComponent, onMounted, onUnmounted, reactive } from "vue";
 import { User } from "@/api/Models";
 import { Login } from "@/api/API";
 
@@ -67,6 +67,20 @@ export default defineComponent({
         emit("close");
       });
     }
+
+    function escapeHandler(e: KeyboardEvent) {
+      if (e.key === "Escape") {
+        emit("close");
+      }
+    }
+
+    onMounted(() => {
+      window.addEventListener("keydown", escapeHandler);
+    });
+
+    onUnmounted(() => {
+      window.removeEventListener("keydown", escapeHandler);
+    });
 
     return {
       user,

@@ -63,6 +63,7 @@ import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import UpdatePackage from "@/components/UpdatePackage.vue";
 import { DeletePackage, loggedIn } from "@/api/API";
 import Dialog from "@/components/Dialog.vue";
+import {loadPackages, packages} from "@/api/packages";
 
 export default defineComponent({
   name: "PackageTable",
@@ -74,7 +75,7 @@ export default defineComponent({
   async setup() {
     const simple = ref(false);
 
-    const packages = await API.GetPackages();
+    loadPackages();
 
     const editPackage = ref(null);
     const deletePackage = ref<Package | null>(null);
