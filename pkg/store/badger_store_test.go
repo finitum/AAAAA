@@ -117,7 +117,7 @@ func TestBadger_AllUserNames(t *testing.T) {
 	assert.NoError(t, store.AddUser(&tstUser))
 	assert.NoError(t, store.AddUser(&tstUser2))
 
-	names, err := store.AllUserNames()
+	names, err := store.AllUsers()
 	assert.NoError(t, err)
 	assert.Len(t, names, 2)
 

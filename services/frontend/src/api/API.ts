@@ -2,7 +2,6 @@ import axios from "axios";
 import { Package, User } from "@/api/Models";
 import { notificationState } from "@/components/NotificationState";
 import { ref, watch } from "vue";
-import {packages} from "@/api/packages";
 
 const client = axios.create({
   baseURL: "http://localhost:5000",
@@ -60,11 +59,52 @@ export async function Login(user: User): Promise<string | null> {
   });
 }
 
+export async function NewUser(user: User): Promise<string | null> {
+  return client.post("/user", user).then(resp => {
+    token = resp.data["token"];
+    loggedIn.value = true;
+    return token;
+  });
+}
+
 export function logOut() {
   token = null;
   loggedIn.value = false;
 
   localStorage.removeItem("token");
+}
+
+export async function GetAllUsers(
+    localToken?: string
+): Promise<User[]> {
+  const originalToken = token;
+  if (typeof localToken !== "undefined") {
+    token = localToken;
+  }
+
+  if (token == null) {
+    return Promise.reject("null token");
+  }
+
+  return client.get("/users").then(resp => {
+    token = originalToken;
+    return resp.data
+  });
+}
+
+export async function DeleteUser(username: string, localToken?: string): Promise<void> {
+  const originalToken = token;
+  if (typeof localToken !== "undefined") {
+    token = localToken;
+  }
+
+  if (token == null) {
+    return Promise.reject("null token");
+  }
+
+  return client.delete("/user/" + username).then(() => {
+    token = originalToken;
+  });
 }
 
 export async function AddPackage(

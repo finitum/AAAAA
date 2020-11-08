@@ -81,6 +81,9 @@ func main() {
 		//r.Use(corsHandler)
 
 		r.Post("/user", rs.AddUser)
+		r.Delete("/user/{username}", rs.DeleteUser)
+		r.Get("/users", rs.GetUsers)
+
 		r.Post("/package", rs.AddPackage)
 
 		r.Delete("/package/{pkg}", rs.RemovePackage)

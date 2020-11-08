@@ -20,7 +20,7 @@
           <slot name="message"></slot>
         </p>
 
-        <button v-if="mode === 'Inform'" class="info" @click="$emit('close')">
+        <button v-if="mode === 'Info'" class="info" @click="$emit('close')">
           Ok
         </button>
 

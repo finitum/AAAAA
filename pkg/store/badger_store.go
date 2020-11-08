@@ -111,14 +111,46 @@ func (b *Badger) AddUser(user *models.User) error {
 	})
 }
 
-func (b *Badger) DelUser(user *models.User) error {
+func (b *Badger) DelUser(username string) error {
 	return b.db.Update(func(txn *badger.Txn) error {
-		return errors.Wrap(txn.Delete([]byte(userPrefix+user.Username)), "badger transaction")
+		return errors.Wrap(txn.Delete([]byte(userPrefix+username)), "badger transaction")
 	})
 }
 
 func (b *Badger) AllUserNames() (users []string, _ error) {
 	return b.allKeysWithPrefix([]byte(userPrefix))
+}
+
+func (b *Badger) AllUsers() (users []*models.User, _ error) {
+	return users, b.db.View(func(txn *badger.Txn) error {
+		opts := badger.DefaultIteratorOptions
+		opts.PrefetchValues = false
+
+		it := txn.NewIterator(opts)
+		defer it.Close()
+
+		for it.Seek([]byte(userPrefix)); it.ValidForPrefix([]byte(userPrefix)); it.Next() {
+			item := it.Item()
+			err := item.Value(func(val []byte) error {
+				buf := bytes.NewBuffer(val)
+				dec := gob.NewDecoder(buf)
+
+				var user models.User
+				err := dec.Decode(&user)
+				if err != nil {
+					return errors.Wrap(err, "gob decode")
+				}
+				users = append(users, &user)
+				return nil
+			})
+
+			if err != nil {
+				return err
+			}
+		}
+
+		return errors.Wrap(nil, "wait what")
+	})
 }
 
 func (b *Badger) allKeysWithPrefix(prefix []byte) (names []string, _ error) {
@@ -139,3 +171,4 @@ func (b *Badger) allKeysWithPrefix(prefix []byte) (names []string, _ error) {
 		return errors.Wrap(nil, "wait what")
 	})
 }
+

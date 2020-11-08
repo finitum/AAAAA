@@ -22,7 +22,8 @@
           ></path>
         </svg>
       </div>
-      <h3 class="text-2xl font-medium bg">Login</h3>
+      <h3 v-if="mode==='login'" class="text-2xl font-medium bg">Login</h3>
+      <h3 v-if="mode==='new-user'" class="text-2xl font-medium bg">New user</h3>
       <form
         class="flex flex-col items-center align-middle justify-between text-center"
         @submit.prevent="ClickLogin"
@@ -45,27 +46,57 @@
             class="input-box"
           />
         </span>
-        <button class="button w-1/3" type="submit">Login</button>
+        <button v-if="mode === 'login'" class="button w-1/3" type="submit">Login</button>
+        <button v-if="mode === 'new-user'" class="button w-1/3" type="submit">Add</button>
       </form>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, onUnmounted, reactive } from "vue";
+import { defineComponent, onMounted, onUnmounted, reactive, PropType } from "vue";
 import { User } from "@/api/Models";
-import { Login } from "@/api/API";
+import {Login, NewUser} from "@/api/API";
+import {users} from "@/api/users";
 
 export default defineComponent({
   name: "Login",
+  props: {
+    mode: {
+      type: String as PropType<"login" | "new-user">,
+      default: "login",
+    }
+  },
   setup(props, { emit }) {
     const user: User = reactive({ Username: "", Password: "" });
 
+    function userExists(username: string): boolean {
+      for (const u of users) {
+        if (username === u.Username) {
+          return true
+        }
+      }
+      return false
+    }
+
     function ClickLogin() {
-      Login(user).then(() => {
-        emit("login");
-        emit("close");
-      });
+      if (props.mode === "login") {
+        Login(user).then(() => {
+          emit("login");
+          emit("close");
+        });
+      } else if (props.mode === "new-user") {
+        if (userExists(user.Username)) {
+          console.log("user exists")
+          return true
+        }
+
+        NewUser(user).then(() => {
+          users.push(user)
+          emit("login");
+          emit("close");
+        });
+      }
     }
 
     function escapeHandler(e: KeyboardEvent) {
@@ -84,7 +115,8 @@ export default defineComponent({
 
     return {
       user,
-      ClickLogin
+      ClickLogin,
+      userExists
     };
   }
 });

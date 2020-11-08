@@ -14,9 +14,11 @@ type StoreAuth struct {
 	jwt *jwtauth.JWTAuth
 }
 
+
 func NewStoreAuth(db store.Store, jwt *jwtauth.JWTAuth) *StoreAuth {
 	return &StoreAuth{db, jwt}
 }
+
 
 func (s *StoreAuth) Login(user *models.User) (string, error) {
 	dbUser, err := s.db.GetUser(user.Username)
