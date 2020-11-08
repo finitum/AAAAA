@@ -1,11 +1,19 @@
 package aur
 
 import (
+	"encoding/json"
+	"fmt"
+	"github.com/pkg/errors"
+	log "github.com/sirupsen/logrus"
 	"net/http"
 	"sort"
 )
 
-type Result struct {
+const aurInfoQuery = "https://aur.archlinux.org/rpc/?v=5&type=info&arg=%s"
+
+type InfoResolveFunction func(string) (ExtendedInfoResults, error)
+
+type SearchResult struct {
 	ID             int
 	Name           string
 	PackageBaseID  int
@@ -22,7 +30,18 @@ type Result struct {
 	URLPath        string
 }
 
-type Results []Result
+type InfoResult struct {
+	SearchResult
+	Depends     []string
+	OptDepends  []string
+	MakeDepends []string
+	Conflicts   []string
+	Provides    []string
+	License     []string
+	Keywords    []string
+}
+
+type Results []SearchResult
 
 func (r Results) SortByPopularity() {
 	sort.Slice(r, func(i, j int) bool {
@@ -40,4 +59,31 @@ type ExtendedResults struct {
 	Results     Results `json:"results"`
 	ResultCount int     `json:"resultcount"`
 	Error       string  `json:"error"`
+}
+
+type ExtendedInfoResults struct {
+	Version     int          `json:"version"`
+	Type        string       `json:"type"`
+	ResultCount int          `json:"resultcount"`
+	Results     []InfoResult `json:"results"`
+	Error       string       `json:"error"`
+}
+
+func SendInfoRequest(pkg string) (res ExtendedInfoResults, err error) {
+	resp, err := http.Get(fmt.Sprintf(aurInfoQuery, pkg))
+	if err != nil {
+		return res, errors.Wrap(err, "received error from aur rpc")
+	}
+
+	err = json.NewDecoder(resp.Body).Decode(&res)
+	if err != nil {
+		log.Error(err)
+		return res, errors.Wrap(err, "couldn't decode result")
+	}
+
+	if res.Error != "" {
+		return res, errors.New(fmt.Sprintf("error from aur: %v", res.Error))
+	}
+
+	return
 }
