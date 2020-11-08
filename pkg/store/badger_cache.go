@@ -8,8 +8,6 @@ import (
 	"github.com/pkg/errors"
 )
 
-const cachePrefix = "cache_"
-
 func (b *Badger) SetResultsEntry(searchterm string, result aur.Results) error {
 	return b.db.Update(func(txn *badger.Txn) error {
 		var value bytes.Buffer
@@ -21,7 +19,7 @@ func (b *Badger) SetResultsEntry(searchterm string, result aur.Results) error {
 		}
 
 		// Add the main key to the store
-		mainEntryKey := []byte(cachePrefix + searchterm)
+		mainEntryKey := []byte(resultsPrefix + searchterm)
 		mainEntry := badger.NewEntry(mainEntryKey, value.Bytes()).WithTTL(cacheTTL)
 		err = txn.SetEntry(mainEntry)
 		if err != nil {
@@ -34,7 +32,7 @@ func (b *Badger) SetResultsEntry(searchterm string, result aur.Results) error {
 
 func (b *Badger) GetResultsEntry(term string) (result aur.Results, _ error) {
 	return result, b.db.View(func(txn *badger.Txn) error {
-		item, err := txn.Get([]byte(cachePrefix + term))
+		item, err := txn.Get([]byte(resultsPrefix + term))
 		if err == badger.ErrKeyNotFound {
 			return ErrNotExists
 		} else if err != nil {

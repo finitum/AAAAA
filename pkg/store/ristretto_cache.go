@@ -40,7 +40,7 @@ func (r *Ristretto) GetResultsEntry(term string) (aur.Results, error) {
 }
 
 func (r *Ristretto) SetInfoEntry(name string, result *aur.InfoResult) error {
-	r.cache.Set(infoPrefix+name, result, 1)
+	r.cache.SetWithTTL(infoPrefix+name, result, 1, cacheTTL)
 	return nil
 }
 
