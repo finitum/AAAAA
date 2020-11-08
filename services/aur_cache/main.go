@@ -2,8 +2,6 @@ package main
 
 import (
 	"context"
-	"encoding/json"
-	"fmt"
 	"github.com/finitum/AAAAA/internal/cors"
 	"github.com/finitum/AAAAA/pkg/aur"
 	"github.com/finitum/AAAAA/pkg/store"
@@ -15,6 +13,10 @@ import (
 	"os"
 	"strings"
 )
+
+func init() {
+	log.SetLevel(log.TraceLevel)
+}
 
 func main() {
 	r := chi.NewRouter()
@@ -49,15 +51,50 @@ func main() {
 		cache = badger
 	}
 
-	r.Get("/search/{term}", proxy(cache))
+	r.Get("/search/{term}", search(cache))
+	r.Get("/info/{name}", info(cache))
 
 	log.Fatal(http.ListenAndServe(":5001", r))
 }
 
-const aurRpcQueryFmt = "https://aur.archlinux.org/rpc/?v=5&type=search&arg=%s"
 const maxReturn int = 50
 
-func proxy(cache store.Cache) http.HandlerFunc {
+func info(cache store.Cache) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		name := chi.URLParam(r, "name")
+
+		entry, err := cache.GetInfoEntry(name)
+		if err == nil {
+			_ = render.Render(w, r, entry)
+			return
+		}
+
+		if err != store.ErrNotExists {
+			log.Errorf("Unexpected error when retrieving cached info entry: %v", err)
+		} else {
+			log.Trace("Info cache miss")
+		}
+
+		res, err := aur.SendInfoRequest(name)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadGateway)
+			return
+		}
+
+		if len(res.Results) < 1 {
+			http.Error(w, "no results", http.StatusBadGateway)
+			return
+		}
+
+		if err := cache.SetInfoEntry(name, &res.Results[0]); err != nil {
+			log.Error("saving to cache failed")
+		}
+
+		_ = render.Render(w, r, &res.Results[0])
+	}
+}
+
+func search(cache store.Cache) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		term := chi.URLParam(r, "term")
 		if len(term) < 3 {
@@ -100,22 +137,9 @@ func proxy(cache store.Cache) http.HandlerFunc {
 			log.Trace("Cache miss!")
 		}
 
-		resp, err := http.Get(fmt.Sprintf(aurRpcQueryFmt, term))
+		res, err := aur.SendResultsRequest(term)
 		if err != nil {
 			http.Error(w, "received error from aur rpc", http.StatusBadGateway)
-			return
-		}
-
-		var res aur.ExtendedResults
-		err = json.NewDecoder(resp.Body).Decode(&res)
-		if err != nil {
-			http.Error(w, "couldn't decode result", http.StatusBadGateway)
-			log.Error(err)
-			return
-		}
-
-		if res.Error != "" {
-			http.Error(w, res.Error, http.StatusBadRequest)
 			return
 		}
 
@@ -123,7 +147,7 @@ func proxy(cache store.Cache) http.HandlerFunc {
 		res.Results.SortByPopularity()
 
 		// Store later
-		err = cache.SetEntry(term, res.Results)
+		err = cache.SetResultsEntry(term, res.Results)
 		if err != nil {
 			// A cache error means we can still return the results we looked up.
 			log.Errorf("Failed to set cache entry (%v)", err)

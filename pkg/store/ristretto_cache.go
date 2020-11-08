@@ -25,18 +25,32 @@ func NewRistretto() (*Ristretto, error) {
 	return &Ristretto{cache}, nil
 }
 
-func (r *Ristretto) SetEntry(term string, result aur.Results) error {
-	r.cache.SetWithTTL(term, result, int64(len(result)), cacheTTL)
+func (r *Ristretto) SetResultsEntry(term string, result aur.Results) error {
+	r.cache.SetWithTTL(resultsPrefix+term, result, int64(len(result)), cacheTTL)
 	return nil
 }
 
-func (r *Ristretto) GetEntry(term string) (aur.Results, error) {
-	value, found := r.cache.Get(term)
+func (r *Ristretto) GetResultsEntry(term string) (aur.Results, error) {
+	value, found := r.cache.Get(resultsPrefix + term)
 	if !found {
 		return nil, ErrNotExists
 	}
 
 	return value.(aur.Results), nil
+}
+
+func (r *Ristretto) SetInfoEntry(name string, result *aur.InfoResult) error {
+	r.cache.Set(infoPrefix+name, result, 1)
+	return nil
+}
+
+func (r *Ristretto) GetInfoEntry(name string) (*aur.InfoResult, error) {
+	value, found := r.cache.Get(infoPrefix + name)
+	if !found {
+		return nil, ErrNotExists
+	}
+
+	return value.(*aur.InfoResult), nil
 }
 
 func (r *Ristretto) Close() {

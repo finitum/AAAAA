@@ -43,14 +43,23 @@ type UserStore interface {
 
 // cacheTTL is the TTL of cache entries
 const cacheTTL = 30 * time.Minute
+const resultsPrefix = "results-"
+const infoPrefix = "info-"
 
 // Cache interface for caching aur rpc results
 type Cache interface {
-	// SetEntry, add an aur result cache entry
-	SetEntry(term string, result aur.Results) error
-	// GetEntry, retrieve a previously inserted entry (not guaranteed to work due to eviction)
+	// SetResultsEntry, add an aur result cache entry
+	SetResultsEntry(term string, result aur.Results) error
+	// GetResultsEntry, retrieve a previously inserted entry (not guaranteed to work due to eviction)
 	// returns ErrNotExists if term can't be found
-	GetEntry(term string) (aur.Results, error)
+	GetResultsEntry(term string) (aur.Results, error)
+
+	// SetInfoEntry, add an aur info cache entry
+	SetInfoEntry(name string, entry *aur.InfoResult) error
+
+	// GetInfoEntry, retrieve a previously inserted entry (not guaranteed to work due to eviction)
+	// returns ErrNotExists if term can't be found
+	GetInfoEntry(name string) (*aur.InfoResult, error)
 }
 
 // GetPartialCacheEntry gets a cache entry even if the term only partially matches the prefix
@@ -61,7 +70,7 @@ func GetPartialCacheEntry(cache Cache, term string) (aur.Results, bool, error) {
 	for i := len(term); i > 2; i-- {
 		toSearch := term[:i]
 
-		item, err := cache.GetEntry(toSearch)
+		item, err := cache.GetResultsEntry(toSearch)
 		if err == ErrNotExists {
 			// continue searching if it doesn't match
 			exact = false
