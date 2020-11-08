@@ -61,7 +61,7 @@ func (k *KubernetesExecutor) buildJobSpec(cfg *Config) (*batchv1.Job, error) {
 	// name is the suffix used for naming jobs/pods/containers
 	name := cfg.Package.Name
 	// backoffLimit specifies how many times a job should be retried
-	backoffLimit := int32(3)
+	backoffLimit := int32(1)
 	// deadlineSeconds specifies how long a job (including retries) may run
 	deadlineSeconds := int64((time.Hour * 4).Seconds())
 	// ttlAfterFinishSeconds specifies how many a seconds a job should be kept around after completion (failure or success)
@@ -74,7 +74,11 @@ func (k *KubernetesExecutor) buildJobSpec(cfg *Config) (*batchv1.Job, error) {
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "aaaaa-job-" + name,
 			Namespace: k.namespace,
-			Labels:    nil,
+			Labels: map[string]string{
+				"name": "aaaaa-builder",
+				"part-of": "aaaaa",
+				"component": "builder",
+			},
 		},
 		Spec: batchv1.JobSpec{
 			ActiveDeadlineSeconds:   &deadlineSeconds,
@@ -86,8 +90,6 @@ func (k *KubernetesExecutor) buildJobSpec(cfg *Config) (*batchv1.Job, error) {
 					Namespace: k.namespace,
 				},
 				Spec: corev1.PodSpec{
-					Volumes:        nil,
-					InitContainers: nil,
 					Containers: []corev1.Container{
 						{
 							Name:  "aaaaa-container-" + name,
@@ -98,8 +100,6 @@ func (k *KubernetesExecutor) buildJobSpec(cfg *Config) (*batchv1.Job, error) {
 									Value: string(cfgb),
 								},
 							},
-							Stdin: false,
-							TTY:   false,
 						},
 					},
 					RestartPolicy: "Never",
