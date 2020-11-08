@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"github.com/dgrijalva/jwt-go"
+	"github.com/finitum/AAAAA/internal/cors"
 	"github.com/finitum/AAAAA/pkg/auth"
 	"github.com/finitum/AAAAA/pkg/executor"
 	"github.com/finitum/AAAAA/pkg/models"
@@ -12,7 +13,6 @@ import (
 	"github.com/finitum/AAAAA/services/control_server/routes"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
-	"github.com/go-chi/cors"
 	"github.com/go-chi/jwtauth"
 	"github.com/go-chi/render"
 	log "github.com/sirupsen/logrus"
@@ -53,7 +53,7 @@ func main() {
 	r.Use(middleware.StripSlashes)
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
-	r.Use(cors.Handler(cors.Options{AllowedOrigins: []string{"*"}}))
+	r.Use(cors.AllowAll)
 	//r.Use(middleware.Compress(5))
 
 	r.Use(render.SetContentType(render.ContentTypeJSON))
@@ -70,12 +70,15 @@ func main() {
 
 		// Handle valid / invalid tokens.
 		r.Use(jwtauth.Authenticator)
+		//r.Use(corsHandler)
 
 		r.Post("/user", rs.AddUser)
 		r.Post("/package", rs.AddPackage)
-		r.Delete("/package/{pkg}", rs.RemovePackage)
 
-		r.Post("/package/{pkg}", rs.UploadPackage)
+		r.Delete("/package/{pkg}", rs.RemovePackage)
+		r.Put("/package/{pkg}", rs.UpdatePackage)
+
+		r.Post("/package/{pkg}/upload", rs.UploadPackage)
 		r.Put("/package/{pkg}/build", rs.TriggerBuild)
 	})
 

@@ -8,7 +8,7 @@
         @click="$emit('close')"
       ></div>
     </div>
-    <div class="bg-white z-20 text-center p-2 my-2 shadow-md rounded content">
+    <div class="bg-white z-20 text-center p-2 my-2 shadow-md rounded">
       <div class="absolute cursor-pointer m-2" @click="$emit('close')">
         <svg
           class="fill-current text-black"
@@ -23,8 +23,9 @@
         </svg>
       </div>
       <h3 class="text-2xl font-medium bg">Login</h3>
-      <div
+      <form
         class="flex flex-col items-center align-middle justify-between text-center"
+        @submit.prevent="ClickLogin"
       >
         <span class="label">
           <label for="username">Username:</label>
@@ -44,8 +45,8 @@
             class="input-box"
           />
         </span>
-        <button class="button w-1/3" @click="ClickLogin">Login</button>
-      </div>
+        <button class="button w-1/3" type="submit">Login</button>
+      </form>
     </div>
   </div>
 </template>

@@ -1,68 +1,80 @@
 <template>
-  <input
-    id="search"
-    v-model="term"
-    @input="onInput"
-    @keydown="onKeySearch"
-    @focusin="showResults = true"
-    @focusout="showResults = false"
-    name="search"
-    placeholder="search for packages here"
-    type="text"
-    class="w-full"
-  />
-  <div class="relative" v-show="showResults">
-    <div
-      class="absolute flex flex-col w-inherit bg-gray-200 rounded-b border-t-2 shadow-xl -mt-1 w-full py-1"
-    >
+  <div>
+    <input
+      @focusin="showResults = true"
+      @focusout="doFocusOut"
+      @input="onInput"
+      @keydown="onKeySearch"
+      class="w-full"
+      id="search"
+      name="search"
+      placeholder="search for packages here"
+      type="text"
+      v-model="term"
+    />
+    <div class="relative" v-show="showResults">
       <div
-        v-for="result of results"
-        v-bind:key="result.ID"
-        class="flex flex-row w-full px-2 cursor-pointer"
-        @mouseover="selected = result.ID"
-        v-bind:class="{ active: selected === result.ID }"
+        class="absolute flex flex-col w-inherit bg-gray-200 rounded-b border-t-2 shadow-xl -mt-1 w-full py-1"
       >
-        <span class="font-bold mr-1 flex-none">
-          {{ result.Name }}
-        </span>
-        <span
-          class="opacity-50 min-w-0 overflow-hidden inline-block overflow-ellipsis whitespace-no-wrap mr-3"
+        <button
+          @mouseover="selected = result"
+          class="flex flex-row w-full px-2 cursor-pointer block dropdown"
+          v-bind:class="{ active: selected === result }"
+          v-bind:key="result.ID"
+          v-for="result of results"
+          @click="addPackage"
         >
-          {{ result.Description }}
-        </span>
-        <span class="ml-auto flex-none">
-          {{ result.Version }}
-        </span>
+          <span class="font-bold mr-1 flex-none">
+            {{ result.Name }}
+          </span>
+          <span
+            class="opacity-50 min-w-0 overflow-hidden inline-block overflow-ellipsis whitespace-no-wrap mr-3"
+          >
+            {{ result.Description }}
+          </span>
+          <span class="ml-auto flex-none">
+            {{ result.Version }}
+          </span>
+        </button>
       </div>
     </div>
+
+    <UpdatePackage
+      v-if="showPackageBuildSelection"
+      :pkgprop="ToPackage(selected)"
+      @close="showPackageBuildSelection = false"
+      mode="add"
+    />
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, reactive } from "vue";
-import { Result, search } from "@/api/AUR";
+import { defineComponent, reactive, ref } from "vue";
+import { ToPackage, Result, search, NewResult } from "@/api/AUR";
+import UpdatePackage from "@/components/UpdatePackage.vue";
+
 export default defineComponent({
   name: "Search",
+  components: { UpdatePackage },
   setup() {
     const term = ref("");
     const results: Result[] = reactive([]);
-    const selected = ref(-1);
+    const selected = ref<Result>(NewResult());
     const showResults = ref(false);
+    const showPackageBuildSelection = ref(false);
 
     function onKeySearch(event: KeyboardEvent) {
-      console.log(event);
-
       let index = -1;
 
       for (let i = 0; i < results.length - 1; i++) {
-        if (results[i].ID === selected.value) {
+        if (results[i].ID === selected.value.ID) {
           index = i;
           break;
         }
       }
 
       if (index === -1) {
-        index = 0;
+        return;
       }
 
       switch (event.key) {
@@ -87,7 +99,12 @@ export default defineComponent({
         }
       }
 
-      selected.value = results[index].ID;
+      selected.value = results[index];
+    }
+
+    function addPackage() {
+      showPackageBuildSelection.value = true;
+      showResults.value = false;
     }
 
     function onInput() {
@@ -97,13 +114,27 @@ export default defineComponent({
       });
     }
 
+    function doFocusOut(e: FocusEvent) {
+      if (
+        e.relatedTarget !== null &&
+        (e.relatedTarget as HTMLElement).classList.contains("dropdown")
+      ) {
+        return;
+      }
+      showResults.value = false;
+    }
+
     return {
       term,
       onInput,
       results,
       selected,
       onKeySearch,
-      showResults
+      addPackage,
+      doFocusOut,
+      showResults,
+      showPackageBuildSelection,
+      ToPackage
     };
   }
 });
@@ -111,7 +142,7 @@ export default defineComponent({
 
 <style lang="postcss" scoped>
 #search {
-  @apply bg-gray-200 appearance-none border-2 border-gray-200 rounded py-2 px-4 text-gray-700 leading-tight;
+  @apply bg-gray-200 appearance-none border-2 border-gray-300 rounded py-2 px-4 text-gray-700 leading-tight;
 }
 
 .active {

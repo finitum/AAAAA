@@ -1,4 +1,4 @@
-import { GetPackages, Login } from "./API";
+import {AddPackage, DeletePackage, GetPackages, Login, UpdatePackage} from "./API";
 import { Package, User } from "@/api/Models";
 import mockAxios from "jest-mock-axios";
 
@@ -8,6 +8,53 @@ afterEach(() => {
 });
 
 describe("#API", () => {
+  it("Should be able to update a package", async () => {
+    const pkg: Package = {
+      Name: "string",
+      RepoURL: "string",
+      RepoBranch: "string",
+      KeepLastN: 2,
+      UpdateFrequency: 5
+    };
+
+    const promise = UpdatePackage(pkg, "");
+
+    expect(mockAxios.put).toHaveBeenCalledWith("/package/" + pkg.Name, pkg);
+
+    mockAxios.mockResponse({ data: {}, status: 200 });
+
+    await promise;
+  });
+
+  it("Should be able to delete a package", async () => {
+    const pkgName = "something"
+
+    const promise = DeletePackage(pkgName, "");
+
+    expect(mockAxios.delete).toHaveBeenCalledWith("/package/" + pkgName);
+
+    mockAxios.mockResponse({ data: {}, status: 200 });
+
+    await promise;
+  });
+
+  it("Should be able to add a package", async () => {
+    const pkg: Package = {
+      Name: "string",
+      RepoURL: "string",
+      RepoBranch: "string",
+      KeepLastN: 2,
+      UpdateFrequency: 5
+    };
+
+    const promise = AddPackage(pkg, "");
+
+    expect(mockAxios.post).toHaveBeenCalledWith("/package", pkg);
+
+    mockAxios.mockResponse({ data: {}, status: 201 });
+
+    await promise;
+  });
   it("Should be able to handle a normal response", async () => {
     const promise = GetPackages();
 
@@ -19,7 +66,6 @@ describe("#API", () => {
         RepoURL: "string",
         RepoBranch: "string",
         KeepLastN: 2,
-        LastHash: "string",
         UpdateFrequency: 5
       }
     ];
