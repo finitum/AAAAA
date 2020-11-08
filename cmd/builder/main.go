@@ -45,7 +45,8 @@ func main() {
 		log.Fatal("Couldn't cd into git repo")
 	}
 
-	log.Println("Building pacakge")
+	// TODO: log makepkg logs to stdout
+	log.Println("Building package")
 	if err := makepkg.Build(); err != nil {
 		log.Fatalf("Building package failed %v", err)
 	}
