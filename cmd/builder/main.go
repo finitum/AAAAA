@@ -87,7 +87,7 @@ func UploadPackage(cfg executor.Config, srcinfo *makepkg.SrcInfo, filename, hash
 		log.Fatalf("Couldn't open package file %v", err)
 	}
 
-	req, err := http.NewRequest(http.MethodPost, cfg.UploadURL+"/"+srcinfo.PackageName + "/upload", file)
+	req, err := http.NewRequest(http.MethodPost, cfg.UploadURL+"/"+srcinfo.PackageName+"/upload", file)
 	if err != nil {
 		log.Fatal("yikes2")
 	}

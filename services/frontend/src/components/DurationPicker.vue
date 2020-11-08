@@ -73,9 +73,8 @@ export default defineComponent({
       return seconds;
     }
 
-    watch(
-      () => props.modelValue,
-      (value, prev) => {
+    watch(() => props.modelValue,
+      () => {
         const seconds = props.modelValue / 1000 / 1000 / 1000;
         if (timeAsSeconds() !== seconds) {
           min.value = Math.floor(seconds / 60);
@@ -102,7 +101,7 @@ export default defineComponent({
     }
 
     return {
-      focusOut: update,
+      update,
       min,
       day,
       hour

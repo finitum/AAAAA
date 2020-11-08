@@ -8,8 +8,9 @@
         @click="$emit('close')"
       ></div>
     </div>
-    <div
+    <form
       class="bg-white z-20 text-center p-2 my-5 shadow-md rounded grid grid-cols-4 auto-cols-fr gap-8 lg:w-1/2 w-full"
+      @submit.prevent="addOrUpdatePackage"
     >
       <h1 class="col-span-full text-3xl font-semibold">{{ pkg.Name }}</h1>
 
@@ -59,9 +60,11 @@
         required
       />
 
-      <button class="col-span-full" @click="addPackage" v-if="mode==='add'">Add Package</button>
-      <button class="col-span-full" @click="updatePackage" v-else>Update Package</button>
-    </div>
+      <button class="col-span-full" type="submit" v-if="mode === 'add'">
+        Add Package
+      </button>
+      <button class="col-span-full" type="submit" v-else>Update Package</button>
+    </form>
   </div>
 </template>
 
@@ -81,7 +84,7 @@ export default defineComponent({
       required: true
     },
     mode: {
-      type: Object as PropType<"update" | "add">,
+      type: String as PropType<"update" | "add">,
       required: true
     }
   },
@@ -91,6 +94,7 @@ export default defineComponent({
     const externalPackage = ref(false);
 
     onMounted(() => {
+      5;
       pkg.value = props.pkgprop;
     });
 
@@ -100,20 +104,21 @@ export default defineComponent({
       }
     }
 
-    function addPackage() {
-      AddPackage(pkg.value).then(() => emit("close"));
-    }
+    function addOrUpdatePackage() {
+      pkg.value.KeepLastN = Number(pkg.value.KeepLastN);
 
-    function updatePackage() {
-      UpdatePackage(pkg.value).then(() => emit("close"));
+      if (props.mode === "update") {
+        UpdatePackage(pkg.value).then(() => emit("close"));
+      } else {
+        AddPackage(pkg.value).then(() => emit("close"));
+      }
     }
 
     return {
       pkg,
       focusOut,
       externalPackage,
-      addPackage,
-      updatePackage,
+      addOrUpdatePackage
     };
   }
 });

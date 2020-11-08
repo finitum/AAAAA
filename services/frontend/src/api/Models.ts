@@ -9,8 +9,6 @@ export interface Package {
   RepoBranch: string;
   // KeepLastN determines how many old versions of packages are kept
   KeepLastN: number;
-  // LastHash is the latest SHA1 retrieved from the package repo
-  LastHash: number[];
   // UpdateFrequency determines how often the package should be updated
   UpdateFrequency: number;
 }
@@ -18,7 +16,6 @@ export interface Package {
 export function NewPackage(): Package {
   return {
     KeepLastN: 2,
-    LastHash: [],
     Name: "",
     RepoBranch: "",
     RepoURL: "",

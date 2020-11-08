@@ -26,7 +26,6 @@ export function ToPackage(result: Result | undefined): Package {
 
   return {
     KeepLastN: 2,
-    LastHash: [],
     Name: result.Name,
     RepoBranch: "master",
     RepoURL: `https://aur.archlinux.org/${result.Name}.git`,

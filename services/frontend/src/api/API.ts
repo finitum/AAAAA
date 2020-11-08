@@ -1,7 +1,7 @@
 import axios from "axios";
 import { Package, User } from "@/api/Models";
 import { notificationState } from "@/components/NotificationState";
-import { ref } from "vue";
+import { ref, watch } from "vue";
 
 const client = axios.create({
   baseURL: "http://localhost:5000",
@@ -32,6 +32,20 @@ client.interceptors.response.use(undefined, error => {
   return Promise.reject(error);
 });
 
+watch(loggedIn, value => {
+  if (value && token !== null) {
+    localStorage.setItem("token", token);
+  }
+});
+
+export function CheckLoggedIn() {
+  const result = localStorage.getItem("token");
+  if (result !== null) {
+    token = result;
+    loggedIn.value = true;
+  }
+}
+
 // Functions
 export async function GetPackages(): Promise<Package[]> {
   return client.get("/package").then(resp => resp.data);
@@ -48,6 +62,8 @@ export async function Login(user: User): Promise<string | null> {
 export function logOut() {
   token = null;
   loggedIn.value = false;
+
+  localStorage.removeItem("token");
 }
 
 export async function AddPackage(
@@ -69,8 +85,8 @@ export async function AddPackage(
 }
 
 export async function UpdatePackage(
-    pkg: Package,
-    localToken?: string
+  pkg: Package,
+  localToken?: string
 ): Promise<void> {
   const originalToken = token;
   if (typeof localToken !== "undefined") {
@@ -82,6 +98,24 @@ export async function UpdatePackage(
   }
 
   return client.put("/package/" + pkg.Name, pkg).then(() => {
+    token = originalToken;
+  });
+}
+
+export async function DeletePackage(
+  pkgname: string,
+  localToken?: string
+): Promise<void> {
+  const originalToken = token;
+  if (typeof localToken !== "undefined") {
+    token = localToken;
+  }
+
+  if (token == null) {
+    return Promise.reject("null token");
+  }
+
+  return client.delete("/package/" + pkgname).then(() => {
     token = originalToken;
   });
 }

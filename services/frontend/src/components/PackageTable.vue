@@ -5,7 +5,6 @@
         <th>Name</th>
         <th>Repo url</th>
         <th v-if="!simple">Branch</th>
-        <th v-if="!simple">Hash</th>
         <th v-if="!simple">Keep last</th>
         <th>Update frequency</th>
         <th v-if="loggedIn"></th>
@@ -14,13 +13,15 @@
         <td>{{ pkg.Name }}</td>
         <td>{{ pkg.RepoURL }}</td>
         <td v-if="!simple">{{ pkg.RepoBranch }}</td>
-        <td v-if="!simple">{{ pkg.LastHash }}</td>
         <td v-if="!simple">{{ pkg.KeepLastN }}</td>
         <td>{{ frequencyToDuration(pkg.UpdateFrequency) }}</td>
 
         <td v-if="loggedIn">
-          <button @click="editPackage = pkg">
+          <button @click="editPackage = pkg" class="mr-3">
             <font-awesome-icon icon="pen" />
+          </button>
+          <button @click="deletePackage = pkg" class="mr-3">
+            <font-awesome-icon class="text-red-600" icon="times" />
           </button>
         </td>
       </tr>
@@ -35,22 +36,40 @@
       mode="update"
       @close="editPackage = null"
     ></UpdatePackage>
+
+    <Dialog
+      v-if="deletePackage !== null"
+      @close="deletePackage = null"
+      mode="Confirm"
+      @accept="doDeletePackage()"
+    >
+      <template v-slot:header>
+        Delete package {{ deletePackage.Name }}
+      </template>
+      <template v-slot:message>
+        Are you sure you want to delete
+        <span class="font-mono font-semibold">{{ deletePackage.Name }}</span
+        >?
+      </template>
+    </Dialog>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, ref } from "vue";
 import * as API from "@/api/API";
-import { frequencyToDuration } from "@/api/Models";
+import { frequencyToDuration, Package } from "@/api/Models";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import UpdatePackage from "@/components/UpdatePackage.vue";
-import {loggedIn} from '@/api/API';
+import { DeletePackage, loggedIn } from "@/api/API";
+import Dialog from "@/components/Dialog.vue";
 
 export default defineComponent({
   name: "PackageTable",
   components: {
     FontAwesomeIcon,
-    UpdatePackage
+    UpdatePackage,
+    Dialog
   },
   async setup() {
     const simple = ref(false);
@@ -58,13 +77,27 @@ export default defineComponent({
     const packages = await API.GetPackages();
 
     const editPackage = ref(null);
+    const deletePackage = ref<Package | null>(null);
+
+    function doDeletePackage() {
+      if (deletePackage.value !== null) {
+        const index = packages.indexOf(deletePackage.value);
+
+        DeletePackage(deletePackage.value.Name).then(() => {
+          packages.splice(index, 1);
+          deletePackage.value = null;
+        });
+      }
+    }
 
     return {
       simple,
       packages,
       frequencyToDuration,
+      deletePackage,
       editPackage,
-      loggedIn
+      loggedIn,
+      doDeletePackage
     };
   }
 });
