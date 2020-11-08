@@ -59,6 +59,7 @@ func (rs *Routes) GetUsers(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		_ = render.Render(w, r, ErrServerError(err))
 		log.Errorf("failed to get users (%v)", err)
+		return
 	}
 
 	users := make([]render.Renderer, len(dbUsers))
@@ -76,10 +77,12 @@ func (rs *Routes) DeleteUser(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		_ = render.Render(w, r, ErrServerError(err))
 		log.Errorf("failed to get users (%v)", err)
+		return
 	}
 	if len(allUsers) == 0 {
 		_ = render.Render(w, r, ErrInvalidRequest(err))
 		log.Errorf("invalid request: can't remove last user (%v)", err)
+		return
 	}
 
 	err = rs.db.DelUser(username)
@@ -88,7 +91,6 @@ func (rs *Routes) DeleteUser(w http.ResponseWriter, r *http.Request) {
 		log.Errorf("failed to remove user (%v)", err)
 	}
 
-	w.WriteHeader(http.StatusOK)
 }
 
 func (rs *Routes) UpdateUser(w http.ResponseWriter, r *http.Request) {
@@ -99,6 +101,11 @@ func (rs *Routes) UpdateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	rs.auth.Update(&user)
+	err := rs.auth.Update(&user)
+	if err != nil {
+		_ = render.Render(w, r, ErrServerError(err))
+		return
+	}
+
 	w.WriteHeader(http.StatusCreated)
 }
