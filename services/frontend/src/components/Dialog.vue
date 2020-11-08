@@ -20,7 +20,7 @@
           <slot name="message"></slot>
         </p>
 
-        <button v-if="mode === 'Inform'" class="info" @click="$emit('close')">
+        <button v-if="mode === 'Info'" class="info" @click="$emit('close')">
           Ok
         </button>
 
@@ -44,7 +44,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from "vue";
+import { defineComponent, onMounted, onUnmounted, PropType } from "vue";
 
 export default defineComponent({
   name: "Dialog",
@@ -55,7 +55,21 @@ export default defineComponent({
       required: true
     }
   },
-  setup() {
+  setup(_, { emit }) {
+    function escapeHandler(e: KeyboardEvent) {
+      if (e.key === "Escape") {
+        emit("close");
+      }
+    }
+
+    onMounted(() => {
+      window.addEventListener("keydown", escapeHandler);
+    });
+
+    onUnmounted(() => {
+      window.removeEventListener("keydown", escapeHandler);
+    });
+
     return {};
   }
 });

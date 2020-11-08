@@ -95,7 +95,7 @@ func TestBadger_AddGetDelUser(t *testing.T) {
 
 	assert.Equal(t, &tstUser, res)
 
-	assert.NoError(t, store.DelUser(&tstUser))
+	assert.NoError(t, store.DelUser(tstUser.Username))
 
 	assert.NoError(t, os.RemoveAll(storePath))
 }

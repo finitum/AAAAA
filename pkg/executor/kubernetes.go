@@ -75,8 +75,8 @@ func (k *KubernetesExecutor) buildJobSpec(cfg *Config) (*batchv1.Job, error) {
 			Name:      "aaaaa-job-" + name,
 			Namespace: k.namespace,
 			Labels: map[string]string{
-				"name": "aaaaa-builder",
-				"part-of": "aaaaa",
+				"name":      "aaaaa-builder",
+				"part-of":   "aaaaa",
 				"component": "builder",
 			},
 		},

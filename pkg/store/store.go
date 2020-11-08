@@ -36,7 +36,9 @@ type UserStore interface {
 	// AddUser adds a user to the store
 	AddUser(user *models.User) error
 	// DelUser removes a user from the store
-	DelUser(user *models.User) error
+	DelUser(username string) error
+	// AllUsers lists  all users in the store
+	AllUsers() ([]*models.User, error)
 	// AllUserNames lists the usernames of all users in the store
 	AllUserNames() ([]string, error)
 }

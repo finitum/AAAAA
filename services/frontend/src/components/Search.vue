@@ -1,7 +1,7 @@
 <template>
   <div>
     <input
-      @focusin="showResults = true"
+      @focusin="doFocusIn"
       @focusout="doFocusOut"
       @input="onInput"
       @keydown="onKeySearch"
@@ -17,41 +17,51 @@
         class="absolute flex flex-col w-inherit bg-gray-200 rounded-b border-t-2 shadow-xl -mt-1 w-full py-1"
       >
         <button
+          @click="addPackage"
           @mouseover="selected = result"
           class="flex flex-row w-full px-2 cursor-pointer block dropdown"
           v-bind:class="{ active: selected === result }"
           v-bind:key="result.ID"
           v-for="result of results"
-          @click="addPackage"
         >
-          <span class="font-bold mr-1 flex-none">
+          <span v-if="result.ID !== -1" class="font-bold mr-1 flex-none">
             {{ result.Name }}
           </span>
           <span
+            v-if="result.ID !== -1"
             class="opacity-50 min-w-0 overflow-hidden inline-block overflow-ellipsis whitespace-no-wrap mr-3"
           >
             {{ result.Description }}
           </span>
-          <span class="ml-auto flex-none">
+          <span v-if="result.ID !== -1" class="ml-auto flex-none">
             {{ result.Version }}
+          </span>
+
+          <span v-if="result.ID === -1" class="mr-auto">
+            Add package by url:
+            {{ result.URL }}
           </span>
         </button>
       </div>
     </div>
 
     <UpdatePackage
-      v-if="showPackageBuildSelection"
-      :pkgprop="ToPackage(selected)"
+      :pkgprop="ToPackage(selected, selected.ID === -1)"
       @close="showPackageBuildSelection = false"
+      :external="selected.ID === -1"
       mode="add"
+      v-if="showPackageBuildSelection"
     />
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, reactive, ref } from "vue";
-import { ToPackage, Result, search, NewResult } from "@/api/AUR";
+import { NewResult, Result, search, ToPackage } from "@/api/AUR";
 import UpdatePackage from "@/components/UpdatePackage.vue";
+import { packages } from "@/api/packages";
+
+const gitUrlRegex = /(?:(?:git|ssh|https?)|(?:git@[\w.]+))(?::(\/\/)?)([\w.@:/\-~]+)(?:\.git)(\/)?/;
 
 export default defineComponent({
   name: "Search",
@@ -63,6 +73,11 @@ export default defineComponent({
     const showResults = ref(false);
     const showPackageBuildSelection = ref(false);
 
+    function addPackage() {
+      showPackageBuildSelection.value = true;
+      showResults.value = false;
+    }
+
     function onKeySearch(event: KeyboardEvent) {
       let index = -1;
 
@@ -73,7 +88,7 @@ export default defineComponent({
         }
       }
 
-      if (index === -1) {
+      if (index === -1 && results.length == 0) {
         return;
       }
 
@@ -97,21 +112,58 @@ export default defineComponent({
           }
           break;
         }
+        case "Enter": {
+          addPackage();
+          break;
+        }
+        case "Escape": {
+          if (event.target !== null && event.target instanceof HTMLElement) {
+            event.target.blur();
+          }
+          break;
+        }
       }
 
-      selected.value = results[index];
-    }
-
-    function addPackage() {
-      showPackageBuildSelection.value = true;
-      showResults.value = false;
+      if (!(index > results.length || index < 0)) {
+        selected.value = results[index];
+      }
     }
 
     function onInput() {
-      search(term.value).then(resp => {
+      const regexmatch = gitUrlRegex.exec(term.value);
+      if (regexmatch !== null) {
+        const res = NewResult();
+
+        res.ID = -1;
+        res.URL = term.value;
+
+        const urlpath = regexmatch[2].split("/");
+        res.Name = urlpath[urlpath.length - 1];
+
         results.splice(0, results.length);
-        results.push(...resp);
-      });
+        results.push(res);
+      } else if (term.value.includes("/")) {
+        results.splice(0, results.length);
+        return;
+      } else {
+        search(term.value).then(resp => {
+          results.splice(0, results.length);
+
+          for (const res of resp) {
+            let found = false;
+            for (const pkg of packages) {
+              if (pkg.Name === res.Name) {
+                found = true;
+                break;
+              }
+            }
+
+            if (!found) {
+              results.push(res);
+            }
+          }
+        });
+      }
     }
 
     function doFocusOut(e: FocusEvent) {
@@ -122,6 +174,12 @@ export default defineComponent({
         return;
       }
       showResults.value = false;
+      results.splice(0, results.length);
+    }
+
+    function doFocusIn() {
+      showResults.value = true;
+      onInput();
     }
 
     return {
@@ -134,7 +192,8 @@ export default defineComponent({
       doFocusOut,
       showResults,
       showPackageBuildSelection,
-      ToPackage
+      ToPackage,
+      doFocusIn
     };
   }
 });

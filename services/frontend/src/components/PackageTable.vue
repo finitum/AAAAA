@@ -16,7 +16,7 @@
         <td v-if="!simple">{{ pkg.KeepLastN }}</td>
         <td>{{ frequencyToDuration(pkg.UpdateFrequency) }}</td>
 
-        <td v-if="loggedIn">
+        <td v-if="loggedIn" class="lastcolthinner">
           <button @click="editPackage = pkg" class="mr-3">
             <font-awesome-icon icon="pen" />
           </button>
@@ -57,12 +57,12 @@
 
 <script lang="ts">
 import { defineComponent, ref } from "vue";
-import * as API from "@/api/API";
 import { frequencyToDuration, Package } from "@/api/Models";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import UpdatePackage from "@/components/UpdatePackage.vue";
 import { DeletePackage, loggedIn } from "@/api/API";
 import Dialog from "@/components/Dialog.vue";
+import { loadPackages, packages } from "@/api/packages";
 
 export default defineComponent({
   name: "PackageTable",
@@ -74,7 +74,7 @@ export default defineComponent({
   async setup() {
     const simple = ref(false);
 
-    const packages = await API.GetPackages();
+    loadPackages();
 
     const editPackage = ref(null);
     const deletePackage = ref<Package | null>(null);
@@ -107,6 +107,11 @@ export default defineComponent({
 th,
 td {
   @apply px-5 text-center border-collapse py-2 table-cell border-b-2 border-gray-100 border-opacity-25;
+}
+
+.lastcolthinner {
+  width: 1%;
+  white-space: nowrap;
 }
 
 .caption {
