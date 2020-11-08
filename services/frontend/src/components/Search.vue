@@ -164,9 +164,6 @@ export default defineComponent({
               }
             }
           })
-          .catch(err => {
-            console.log(err);
-          });
       }
     }
 
@@ -212,7 +209,4 @@ export default defineComponent({
   @apply bg-gray-400;
 }
 
-.installed {
-  @apply bg-green-300;
-}
 </style>

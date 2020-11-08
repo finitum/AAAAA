@@ -119,8 +119,8 @@ export default defineComponent({
         UpdatePackage(pkg.value).then(() => emit("close"));
       } else {
         AddPackage(pkg.value)
-          .then(() => emit("close"))
           .then(() => {
+            emit("close")
             packages.push(pkg.value);
           });
       }
