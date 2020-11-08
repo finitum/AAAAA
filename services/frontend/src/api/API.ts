@@ -58,15 +58,6 @@ export async function Login(user: User): Promise<string | null> {
     return token;
   });
 }
-
-export async function NewUser(user: User): Promise<string | null> {
-  return client.post("/user", user).then(resp => {
-    token = resp.data["token"];
-    loggedIn.value = true;
-    return token;
-  });
-}
-
 export function logOut() {
   token = null;
   loggedIn.value = false;
@@ -74,9 +65,7 @@ export function logOut() {
   localStorage.removeItem("token");
 }
 
-export async function GetAllUsers(
-    localToken?: string
-): Promise<User[]> {
+export async function GetAllUsers(localToken?: string): Promise<User[]> {
   const originalToken = token;
   if (typeof localToken !== "undefined") {
     token = localToken;
@@ -88,11 +77,14 @@ export async function GetAllUsers(
 
   return client.get("/users").then(resp => {
     token = originalToken;
-    return resp.data
+    return resp.data;
   });
 }
 
-export async function DeleteUser(username: string, localToken?: string): Promise<void> {
+export async function DeleteUser(
+  username: string,
+  localToken?: string
+): Promise<void> {
   const originalToken = token;
   if (typeof localToken !== "undefined") {
     token = localToken;
@@ -104,6 +96,44 @@ export async function DeleteUser(username: string, localToken?: string): Promise
 
   return client.delete("/user/" + username).then(() => {
     token = originalToken;
+  });
+}
+
+export async function NewUser(
+  user: User,
+  localToken?: string
+): Promise<string | null> {
+  const originalToken = token;
+  if (typeof localToken !== "undefined") {
+    token = localToken;
+  }
+
+  if (token == null) {
+    return Promise.reject("null token");
+  }
+
+  return client.post("/user", user).then(() => {
+    token = originalToken;
+    return token;
+  });
+}
+
+export async function UpdateUser(
+  user: User,
+  localToken?: string
+): Promise<string | null> {
+  const originalToken = token;
+  if (typeof localToken !== "undefined") {
+    token = localToken;
+  }
+
+  if (token == null) {
+    return Promise.reject("null token");
+  }
+
+  return client.put("/user", user).then(() => {
+    token = originalToken;
+    return token;
   });
 }
 

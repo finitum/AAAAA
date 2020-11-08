@@ -1,9 +1,12 @@
 import {
   AddPackage,
   DeletePackage,
+  GetAllUsers,
   GetPackages,
   Login,
-  UpdatePackage
+  NewUser,
+  UpdatePackage,
+  UpdateUser
 } from "./API";
 import { Package, User } from "@/api/Models";
 import mockAxios from "jest-mock-axios";
@@ -14,6 +17,46 @@ afterEach(() => {
 });
 
 describe("#API", () => {
+  it("Should be able to add a new user", async () => {
+    const user: User = {
+      Username: "test1",
+      Password: "test2"
+    };
+
+    const promise = NewUser(user, "");
+
+    expect(mockAxios.post).toHaveBeenCalledWith("/user", user);
+
+    mockAxios.mockResponse({ data: {}, status: 200 });
+
+    await promise;
+  });
+
+  it("Should be able to update a user", async () => {
+    const user: User = {
+      Username: "test1",
+      Password: "test2"
+    };
+
+    const promise = UpdateUser(user, "");
+
+    expect(mockAxios.put).toHaveBeenCalledWith("/user", user);
+
+    mockAxios.mockResponse({ data: {}, status: 200 });
+
+    await promise;
+  });
+
+  it("Should be able to get all users", async () => {
+    const promise = GetAllUsers("");
+
+    expect(mockAxios.get).toHaveBeenCalledWith("/users");
+
+    mockAxios.mockResponse({ data: {}, status: 200 });
+
+    await promise;
+  });
+
   it("Should be able to update a package", async () => {
     const pkg: Package = {
       Name: "string",

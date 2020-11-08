@@ -22,5 +22,3 @@ func New(cfg *config.Config, db store.Store, auth auth.AuthenticationService, ex
 func (*Routes) HelloWorld(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write([]byte("Hello World!"))
 }
-
-

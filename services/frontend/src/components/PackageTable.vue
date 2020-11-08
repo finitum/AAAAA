@@ -16,7 +16,7 @@
         <td v-if="!simple">{{ pkg.KeepLastN }}</td>
         <td>{{ frequencyToDuration(pkg.UpdateFrequency) }}</td>
 
-        <td v-if="loggedIn">
+        <td v-if="loggedIn" class="lastcolthinner">
           <button @click="editPackage = pkg" class="mr-3">
             <font-awesome-icon icon="pen" />
           </button>
@@ -107,6 +107,11 @@ export default defineComponent({
 th,
 td {
   @apply px-5 text-center border-collapse py-2 table-cell border-b-2 border-gray-100 border-opacity-25;
+}
+
+.lastcolthinner {
+  width: 1%;
+  white-space: nowrap;
 }
 
 .caption {

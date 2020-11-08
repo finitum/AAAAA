@@ -73,7 +73,15 @@ const client = axios.create({
 });
 
 client.interceptors.response.use(undefined, error => {
-  notificationState.message = error.message;
+  console.log(error.response);
+  if (
+    error.response.status === 400 &&
+    error.response.request.responseURL.includes("/search/")
+  ) {
+    return Promise.resolve();
+  }
+
+  notificationState.message = error.response.response;
   notificationState.color = "#feb2b2";
   notificationState.enabled = true;
 
@@ -85,5 +93,11 @@ export async function search(term: string): Promise<Result[]> {
     return Promise.resolve([]);
   }
 
-  return client.get("/" + term).then(resp => resp.data);
+  return client.get("/" + term).then(resp => {
+    if (typeof resp !== "undefined") {
+      return resp.data;
+    } else {
+      return [];
+    }
+  });
 }

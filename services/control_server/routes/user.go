@@ -90,6 +90,17 @@ func (rs *Routes) DeleteUser(w http.ResponseWriter, r *http.Request) {
 		log.Errorf("failed to remove user (%v)", err)
 	}
 
-
 	w.WriteHeader(http.StatusOK)
+}
+
+func (rs *Routes) UpdateUser(w http.ResponseWriter, r *http.Request) {
+	var user models.User
+
+	if err := render.Bind(r, &user); err != nil {
+		_ = render.Render(w, r, ErrInvalidRequest(err))
+		return
+	}
+
+	rs.auth.Update(&user)
+	w.WriteHeader(http.StatusCreated)
 }

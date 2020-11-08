@@ -118,11 +118,10 @@ export default defineComponent({
       if (props.mode === "update") {
         UpdatePackage(pkg.value).then(() => emit("close"));
       } else {
-        AddPackage(pkg.value)
-          .then(() => {
-            emit("close")
-            packages.push(pkg.value);
-          });
+        AddPackage(pkg.value).then(() => {
+          emit("close");
+          packages.push(pkg.value);
+        });
       }
     }
 

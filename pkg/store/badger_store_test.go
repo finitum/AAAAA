@@ -95,7 +95,7 @@ func TestBadger_AddGetDelUser(t *testing.T) {
 
 	assert.Equal(t, &tstUser, res)
 
-	assert.NoError(t, store.DelUser(&tstUser))
+	assert.NoError(t, store.DelUser(tstUser.Username))
 
 	assert.NoError(t, os.RemoveAll(storePath))
 }
@@ -117,7 +117,7 @@ func TestBadger_AllUserNames(t *testing.T) {
 	assert.NoError(t, store.AddUser(&tstUser))
 	assert.NoError(t, store.AddUser(&tstUser2))
 
-	names, err := store.AllUsers()
+	names, err := store.AllUserNames()
 	assert.NoError(t, err)
 	assert.Len(t, names, 2)
 

@@ -4,29 +4,37 @@
 
     <div class="flex flex-row justify-center">
       <div
-              class="bg-primarylight cursor-pointer flex flex-col items-center justify-center h-full"
-              @click="router.push('/')"
-              v-if="router.currentRoute.value.path !== '/'"
+        class="cursor-pointer flex flex-col items-center justify-center h-full"
+        @click="router.push('/')"
+        v-bind:class="[
+          router.currentRoute.value.path !== '/'
+            ? 'bg-primary'
+            : 'bg-primarylight'
+        ]"
       >
         <span class="button">Home</span>
       </div>
       <div
-              class="bg-primarylight cursor-pointer flex flex-col items-center justify-center h-full"
-              @click="router.push('/users')"
-              v-if="loggedIn && router.currentRoute.value.path !== '/users'"
+        class="cursor-pointer flex flex-col items-center justify-center h-full"
+        @click="router.push('/users')"
+        v-bind:class="[
+          router.currentRoute.value.path !== '/users'
+            ? 'bg-primary'
+            : 'bg-primarylight'
+        ]"
+        v-if="loggedIn"
       >
         <span class="button">Users</span>
       </div>
 
       <div
-              class="bg-primarylight cursor-pointer flex flex-col items-center justify-center h-full"
-              @click="loginButton()"
+        class="bg-primary cursor-pointer flex flex-col items-center justify-center h-full"
+        @click="loginButton()"
       >
         <span v-if="!loggedIn" class="button">Login</span>
         <span v-else class="button">Log out</span>
       </div>
     </div>
-
   </header>
 </template>
 
@@ -40,7 +48,7 @@ export default defineComponent({
   setup(_, { emit }) {
     function loginButton() {
       if (loggedIn.value) {
-        router.push("/")
+        router.push("/");
         logOut();
       } else {
         emit("login");

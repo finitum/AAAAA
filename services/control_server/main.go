@@ -82,6 +82,7 @@ func main() {
 
 		r.Post("/user", rs.AddUser)
 		r.Delete("/user/{username}", rs.DeleteUser)
+		r.Put("/user", rs.UpdateUser)
 		r.Get("/users", rs.GetUsers)
 
 		r.Post("/package", rs.AddPackage)

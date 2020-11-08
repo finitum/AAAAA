@@ -1,7 +1,6 @@
 <template>
   <div class="flex flex-col w-100 items-center align-middle">
-    <div class="lg:w-2/3 w-full p-2">
-
+    <div class="lg:w-1/4 w-full p-2">
       <Suspense>
         <template #default>
           <UsersTable />
@@ -22,8 +21,7 @@ export default defineComponent({
   name: "Users",
   components: { UsersTable },
   setup() {
-
-    return { };
+    return {};
   }
 });
 </script>

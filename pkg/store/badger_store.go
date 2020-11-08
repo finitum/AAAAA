@@ -171,4 +171,3 @@ func (b *Badger) allKeysWithPrefix(prefix []byte) (names []string, _ error) {
 		return errors.Wrap(nil, "wait what")
 	})
 }
-
