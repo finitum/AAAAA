@@ -146,24 +146,23 @@ export default defineComponent({
         results.splice(0, results.length);
         return;
       } else {
-        search(term.value)
-          .then(resp => {
-            results.splice(0, results.length);
+        search(term.value).then(resp => {
+          results.splice(0, results.length);
 
-            for (const res of resp) {
-              let found = false;
-              for (const pkg of packages) {
-                if (pkg.Name === res.Name) {
-                  found = true;
-                  break;
-                }
-              }
-
-              if (!found) {
-                results.push(res);
+          for (const res of resp) {
+            let found = false;
+            for (const pkg of packages) {
+              if (pkg.Name === res.Name) {
+                found = true;
+                break;
               }
             }
-          })
+
+            if (!found) {
+              results.push(res);
+            }
+          }
+        });
       }
     }
 
@@ -208,5 +207,4 @@ export default defineComponent({
 .active {
   @apply bg-gray-400;
 }
-
 </style>
