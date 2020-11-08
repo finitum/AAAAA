@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"github.com/dgrijalva/jwt-go"
+	"github.com/finitum/AAAAA/internal/cors"
 	"github.com/finitum/AAAAA/pkg/auth"
 	"github.com/finitum/AAAAA/pkg/executor"
 	"github.com/finitum/AAAAA/pkg/models"
@@ -52,18 +53,7 @@ func main() {
 	r.Use(middleware.StripSlashes)
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
-	r.Use(func(h http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.Header().Set("Access-Control-Allow-Origin", "*")
-			w.Header().Set("Access-Control-Allow-Headers", "*")
-
-			if r.Method == http.MethodOptions {
-				return
-			}
-
-			h.ServeHTTP(w, r)
-		})
-	})
+	r.Use(cors.AllowAll)
 	//r.Use(middleware.Compress(5))
 
 	r.Use(render.SetContentType(render.ContentTypeJSON))
