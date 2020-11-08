@@ -8,9 +8,6 @@ import (
 	"github.com/pkg/errors"
 )
 
-const pkgPrefix = "pkg_"
-const userPrefix = "user_"
-
 func (b *Badger) GetPackage(name string) (*models.Pkg, error) {
 	var pkg *models.Pkg
 
