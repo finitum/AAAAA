@@ -4,11 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/finitum/AAAAA/internal/cors"
 	"github.com/finitum/AAAAA/pkg/aur"
 	"github.com/finitum/AAAAA/pkg/store"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
-	"github.com/go-chi/cors"
 	"github.com/go-chi/render"
 	log "github.com/sirupsen/logrus"
 	"net/http"
@@ -21,8 +21,7 @@ func main() {
 	r.Use(middleware.StripSlashes)
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
-
-	r.Use(cors.Handler(cors.Options{AllowedOrigins: []string{"*"}}))
+	r.Use(cors.AllowAll)
 	r.Use(render.SetContentType(render.ContentTypeJSON))
 
 	cachetype := os.Getenv("CACHE_TYPE")
