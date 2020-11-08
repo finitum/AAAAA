@@ -57,13 +57,12 @@
 
 <script lang="ts">
 import { defineComponent, ref } from "vue";
-import * as API from "@/api/API";
 import { frequencyToDuration, Package } from "@/api/Models";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import UpdatePackage from "@/components/UpdatePackage.vue";
 import { DeletePackage, loggedIn } from "@/api/API";
 import Dialog from "@/components/Dialog.vue";
-import {loadPackages, packages} from "@/api/packages";
+import { loadPackages, packages } from "@/api/packages";
 
 export default defineComponent({
   name: "PackageTable",

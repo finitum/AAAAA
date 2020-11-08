@@ -67,7 +67,7 @@ import { defineComponent, PropType, ref, onMounted, onUnmounted } from "vue";
 import DurationPicker from "@/components/DurationPicker.vue";
 import { NewPackage, Package } from "@/api/Models";
 import { AddPackage, UpdatePackage } from "@/api/API";
-import {packages} from "@/api/packages";
+import { packages } from "@/api/packages";
 
 export default defineComponent({
   name: "UpdatePackage",
@@ -118,8 +118,9 @@ export default defineComponent({
       if (props.mode === "update") {
         UpdatePackage(pkg.value).then(() => emit("close"));
       } else {
-        AddPackage(pkg.value).then(() => emit("close"))
+        AddPackage(pkg.value)
           .then(() => {
+            emit("close")
             packages.push(pkg.value);
           });
       }

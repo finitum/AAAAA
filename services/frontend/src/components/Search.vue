@@ -59,7 +59,7 @@
 import { defineComponent, reactive, ref } from "vue";
 import { NewResult, Result, search, ToPackage } from "@/api/AUR";
 import UpdatePackage from "@/components/UpdatePackage.vue";
-import {packages} from "@/api/packages";
+import { packages } from "@/api/packages";
 
 const gitUrlRegex = /(?:(?:git|ssh|https?)|(?:git@[\w.]+))(?::(\/\/)?)([\w.@:/\-~]+)(?:\.git)(\/)?/;
 
@@ -142,10 +142,7 @@ export default defineComponent({
 
         results.splice(0, results.length);
         results.push(res);
-      } else if (
-        ["git://", "ssh://", "http://", "https://"].some(i => term.value.startsWith(i)) ||
-        term.value.includes("/")
-      ) {
+      } else if (term.value.includes("/")) {
         results.splice(0, results.length);
         return;
       } else {
@@ -157,7 +154,7 @@ export default defineComponent({
               let found = false;
               for (const pkg of packages) {
                 if (pkg.Name === res.Name) {
-                  found = true
+                  found = true;
                   break;
                 }
               }
@@ -166,11 +163,7 @@ export default defineComponent({
                 results.push(res);
               }
             }
-
           })
-          .catch(err => {
-            console.log(err);
-          });
       }
     }
 
@@ -186,12 +179,8 @@ export default defineComponent({
     }
 
     function doFocusIn() {
-      showResults.value = true
-      onInput()
-    }
-
-    function packageInstalled(res: Result): boolean{
-      return false;
+      showResults.value = true;
+      onInput();
     }
 
     return {
@@ -205,23 +194,19 @@ export default defineComponent({
       showResults,
       showPackageBuildSelection,
       ToPackage,
-      doFocusIn,
-      packageInstalled
+      doFocusIn
     };
   }
 });
 </script>
 
 <style lang="postcss" scoped>
-  #search {
-    @apply bg-gray-200 appearance-none border-2 border-gray-300 rounded py-2 px-4 text-gray-700 leading-tight;
-  }
+#search {
+  @apply bg-gray-200 appearance-none border-2 border-gray-300 rounded py-2 px-4 text-gray-700 leading-tight;
+}
 
-  .active {
-    @apply bg-gray-400;
-  }
+.active {
+  @apply bg-gray-400;
+}
 
-  .installed {
-    @apply bg-green-300;
-  }
 </style>
