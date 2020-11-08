@@ -50,10 +50,13 @@ export function logOut() {
   loggedIn.value = false;
 }
 
-export async function AddPackage(pkg: Package, localToken?: string): Promise<void> {
+export async function AddPackage(
+  pkg: Package,
+  localToken?: string
+): Promise<void> {
   const originalToken = token;
   if (typeof localToken !== "undefined") {
-    token = localToken
+    token = localToken;
   }
 
   if (token == null) {
@@ -61,6 +64,24 @@ export async function AddPackage(pkg: Package, localToken?: string): Promise<voi
   }
 
   return client.post("/package", pkg).then(() => {
+    token = originalToken;
+  });
+}
+
+export async function UpdatePackage(
+    pkg: Package,
+    localToken?: string
+): Promise<void> {
+  const originalToken = token;
+  if (typeof localToken !== "undefined") {
+    token = localToken;
+  }
+
+  if (token == null) {
+    return Promise.reject("null token");
+  }
+
+  return client.put("/package/" + pkg.Name, pkg).then(() => {
     token = originalToken;
   });
 }

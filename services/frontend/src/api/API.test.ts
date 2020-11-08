@@ -1,4 +1,4 @@
-import {AddPackage, GetPackages, Login} from "./API";
+import { AddPackage, GetPackages, Login } from "./API";
 import { Package, User } from "@/api/Models";
 import mockAxios from "jest-mock-axios";
 
@@ -18,13 +18,11 @@ describe("#API", () => {
       UpdateFrequency: 5
     };
 
-
     const promise = AddPackage(pkg, "");
 
     expect(mockAxios.post).toHaveBeenCalledWith("/package", pkg);
 
-
-    mockAxios.mockResponse({ data: {}, status: 201});
+    mockAxios.mockResponse({ data: {}, status: 201 });
 
     await promise;
   });

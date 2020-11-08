@@ -59,7 +59,8 @@
         required
       />
 
-      <button class="col-span-full" @click="submitPackage">Add Package</button>
+      <button class="col-span-full" @click="addPackage" v-if="mode==='add'">Add Package</button>
+      <button class="col-span-full" @click="updatePackage" v-else>Update Package</button>
     </div>
   </div>
 </template>
@@ -68,15 +69,19 @@
 import { defineComponent, PropType, ref, onMounted } from "vue";
 import DurationPicker from "@/components/DurationPicker.vue";
 import { NewPackage, Package } from "@/api/Models";
-import { AddPackage } from "@/api/API";
+import { AddPackage, UpdatePackage } from "@/api/API";
 
 export default defineComponent({
-  name: "PackageBuildSelection",
+  name: "UpdatePackage",
   components: { DurationPicker },
 
   props: {
     pkgprop: {
       type: Object as PropType<Package>,
+      required: true
+    },
+    mode: {
+      type: Object as PropType<"update" | "add">,
       required: true
     }
   },
@@ -95,15 +100,20 @@ export default defineComponent({
       }
     }
 
-    function submitPackage() {
+    function addPackage() {
       AddPackage(pkg.value).then(() => emit("close"));
+    }
+
+    function updatePackage() {
+      UpdatePackage(pkg.value).then(() => emit("close"));
     }
 
     return {
       pkg,
       focusOut,
       externalPackage,
-      submitPackage
+      addPackage,
+      updatePackage,
     };
   }
 });

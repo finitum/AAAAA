@@ -39,10 +39,11 @@
       </div>
     </div>
 
-    <PackageBuildSelection
+    <UpdatePackage
       v-if="showPackageBuildSelection"
       :pkgprop="ToPackage(selected)"
       @close="showPackageBuildSelection = false"
+      mode="add"
     />
   </div>
 </template>
@@ -50,11 +51,11 @@
 <script lang="ts">
 import { defineComponent, reactive, ref } from "vue";
 import { ToPackage, Result, search, NewResult } from "@/api/AUR";
-import PackageBuildSelection from "@/components/PackageBuildSelection.vue";
+import UpdatePackage from "@/components/UpdatePackage.vue";
 
 export default defineComponent({
   name: "Search",
-  components: { PackageBuildSelection },
+  components: { UpdatePackage },
   setup() {
     const term = ref("");
     const results: Result[] = reactive([]);
