@@ -3,10 +3,8 @@
 package repo_add
 
 import (
-	"errors"
-	"fmt"
-	"io/ioutil"
-	"os"
+	"github.com/finitum/AAAAA/internal/cmdutil"
+	"github.com/pkg/errors"
 	"os/exec"
 )
 
@@ -110,17 +108,8 @@ func (r *RepoAdd) AddPackage(packagepath string, options *RepoAddOptions) error 
 	so = append(so, r.dbpath)
 	so = append(so, packagepath)
 
-	cmd := exec.Command(repoAddCommand, so...)
-	cmd.Stdout = os.Stdout
-	pipe, err := cmd.StderrPipe()
-	if err != nil {
-		return err
-	}
-
-	err = cmd.Run()
-	if err != nil {
-		res, _ := ioutil.ReadAll(pipe)
-		return fmt.Errorf("running repo-add failed (%d) (%v) (stderr=%v)", cmd.ProcessState.ExitCode(), err, res)
+	if out, _, err := cmdutil.RunCommand(repoAddCommand, so...); err != nil {
+		return errors.Wrapf(err, "repo add package stdout (%s)", out)
 	}
 
 	return nil
@@ -133,19 +122,9 @@ func (r *RepoAdd) RemovePackage(packagepath string, options CommonOptions) error
 	so = append(so, r.dbpath)
 	so = append(so, packagepath)
 
-	cmd := exec.Command(repoAddCommand, so...)
-	cmd.Args[0] = repoRemoveCommand
-
-	cmd.Stdout = os.Stdout
-	pipe, err := cmd.StderrPipe()
-	if err != nil {
-		return err
+	if out, _, err := cmdutil.RunCommand(repoRemoveCommand, so...); err != nil {
+		return errors.Wrapf(err, "repo remove package stdout (%s)", out)
 	}
 
-	err = cmd.Run()
-	if err != nil {
-		res, _ := ioutil.ReadAll(pipe)
-		return fmt.Errorf("running repo-remove failed (%d) (%v) (stderr=%v)", cmd.ProcessState.ExitCode(), err, res)
-	}
 	return nil
 }
