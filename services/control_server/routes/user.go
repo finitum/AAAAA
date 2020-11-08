@@ -63,8 +63,6 @@ func (rs *Routes) GetUsers(w http.ResponseWriter, r *http.Request) {
 
 	users := make([]render.Renderer, len(dbUsers))
 	for i, user := range dbUsers {
-		// No need to send these
-		user.Password = ""
 		users[i] = user
 	}
 

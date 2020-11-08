@@ -124,7 +124,6 @@ func (b *Badger) AllUserNames() (users []string, _ error) {
 func (b *Badger) AllUsers() (users []*models.User, _ error) {
 	return users, b.db.View(func(txn *badger.Txn) error {
 		opts := badger.DefaultIteratorOptions
-		opts.PrefetchValues = false
 
 		it := txn.NewIterator(opts)
 		defer it.Close()
@@ -145,7 +144,7 @@ func (b *Badger) AllUsers() (users []*models.User, _ error) {
 			})
 
 			if err != nil {
-				return err
+				return errors.Wrap(err, "value")
 			}
 		}
 

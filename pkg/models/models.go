@@ -57,6 +57,8 @@ type User struct {
 }
 
 func (u *User) Render(w http.ResponseWriter, r *http.Request) error {
+	u.Password = ""
+
 	return nil
 }
 
