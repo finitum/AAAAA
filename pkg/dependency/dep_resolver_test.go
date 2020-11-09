@@ -2,6 +2,7 @@ package dependency
 
 import (
 	"errors"
+	"fmt"
 	"github.com/finitum/AAAAA/pkg/aur"
 	"github.com/stretchr/testify/assert"
 	"sort"
@@ -9,48 +10,27 @@ import (
 	"time"
 )
 
-func testInfoResolver(pkg string) (aur.ExtendedInfoResults, error) {
-	var res []aur.InfoResult
+func testInfoResolver(_, pkg string) (aur.InfoResult, error) {
+	var res aur.InfoResult
 
 	switch pkg {
 	case "yay":
-		res = []aur.InfoResult{
-			{
-				Depends: []string{"non-yay"},
-			},
-		}
+		res.Depends = []string{"non-yay"}
 	case "non-yay":
-		res = []aur.InfoResult{
-			{
-				Depends: []string{"minecraft"},
-			},
-		}
+		res.Depends = []string{"minecraft"}
 	case "minecraft":
-		res = []aur.InfoResult{
-			{
-				MakeDepends: []string{"java-18"},
-			},
-		}
+		res.MakeDepends = []string{"java-18"}
 	case "circ-a":
-		res = []aur.InfoResult{
-			{
-				Depends:     []string{"circ-b"},
-				MakeDepends: []string{"minecraft"},
-			},
-		}
+		res.Depends = []string{"circ-b"}
+		res.MakeDepends = []string{"minecraft"}
 	case "circ-b":
-		res = []aur.InfoResult{
-			{
-				Depends:     []string{"circ-a", "non-yay"},
-				MakeDepends: []string{"minecraft"},
-			},
-		}
+		res.Depends = []string{"circ-a", "non-yay"}
+		res.MakeDepends = []string{"minecraft"}
+	default:
+		return aur.InfoResult{}, aur.NotInAurErr
 	}
 
-	return aur.ExtendedInfoResults{
-		ResultCount: len(res),
-		Results:     res,
-	}, nil
+	return res, nil
 }
 
 func TestNormal(t *testing.T) {
@@ -59,7 +39,7 @@ func TestNormal(t *testing.T) {
 	exp["minecraft"] = Dependency{name: "minecraft", dependencies: []string{}}
 
 	actual := make([]Dependency, 0, len(exp))
-	r := NewResolverWithFunction(testInfoResolver)
+	r := NewResolverWithFunction("", testInfoResolver)
 
 	it, err := r.Resolve("yay")
 	assert.NoError(t, err)
@@ -72,17 +52,8 @@ func TestNormal(t *testing.T) {
 }
 
 func TestAurErr(t *testing.T) {
-	r := NewResolverWithFunction(func(_ string) (aur.ExtendedInfoResults, error) {
-		return aur.ExtendedInfoResults{}, errors.New("err")
-	})
-
-	_, err := r.Resolve("something")
-	assert.Error(t, err)
-}
-
-func TestAurToManyResults(t *testing.T) {
-	r := NewResolverWithFunction(func(_ string) (aur.ExtendedInfoResults, error) {
-		return aur.ExtendedInfoResults{ResultCount: 42}, nil
+	r := NewResolverWithFunction("", func(_, _ string) (aur.InfoResult, error) {
+		return aur.InfoResult{}, errors.New("err")
 	})
 
 	_, err := r.Resolve("something")
@@ -100,7 +71,7 @@ func TestCircular(t *testing.T) {
 		exp["minecraft"] = Dependency{name: "minecraft", dependencies: []string{}}
 
 		actual := make([]Dependency, 0, len(exp))
-		r := NewResolverWithFunction(testInfoResolver)
+		r := NewResolverWithFunction("", testInfoResolver)
 
 		it, err := r.Resolve("circ-a")
 		assert.NoError(t, err)
@@ -118,6 +89,19 @@ func TestCircular(t *testing.T) {
 	case <-timeout:
 		t.Fatal("dependency resolver is probably stuck in a loop, while it should handle circular dependencies")
 	case <-done:
+	}
+}
+
+func TestWithCache(t *testing.T) {
+	t.Skip("Only used for manual testing at this point in time")
+
+	r := NewResolver()
+	it, err := r.Resolve("lib32-eudev")
+
+	assert.NoError(t, err)
+
+	for it.Next() {
+		fmt.Printf("%v\n", it.Item())
 	}
 }
 

@@ -12,7 +12,7 @@ import (
 const aurInfoQuery = "https://aur.archlinux.org/rpc/?v=5&type=info&arg=%s"
 const aurSearchQuery = "https://aur.archlinux.org/rpc/?v=5&type=search&arg=%s"
 
-type InfoResolveFunction func(string) (ExtendedInfoResults, error)
+type InfoResolveFunction func(string, string) (InfoResult, error)
 
 type SearchResult struct {
 	ID             int
@@ -40,6 +40,7 @@ type InfoResult struct {
 	Provides    []string
 	License     []string
 	Keywords    []string
+	OnAur       bool
 }
 
 func (i *InfoResult) Render(http.ResponseWriter, *http.Request) error {

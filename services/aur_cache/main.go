@@ -65,6 +65,11 @@ func info(cache store.Cache) http.HandlerFunc {
 
 		entry, err := cache.GetInfoEntry(name)
 		if err == nil {
+			if !entry.OnAur {
+				http.Error(w, "no results", http.StatusNotFound)
+				return
+			}
+
 			_ = render.Render(w, r, entry)
 			return
 		}
@@ -82,9 +87,16 @@ func info(cache store.Cache) http.HandlerFunc {
 		}
 
 		if len(res.Results) < 1 {
-			http.Error(w, "no results", http.StatusBadGateway)
+			if err := cache.SetInfoEntry(name, &aur.InfoResult{}); err != nil {
+				log.Error("saving to cache failed")
+			}
+
+			http.Error(w, "no results", http.StatusNotFound)
 			return
 		}
+
+		// Ensure the OnAur field is set
+		res.Results[0].OnAur = true
 
 		if err := cache.SetInfoEntry(name, &res.Results[0]); err != nil {
 			log.Error("saving to cache failed")

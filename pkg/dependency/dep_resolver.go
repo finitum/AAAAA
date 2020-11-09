@@ -1,7 +1,6 @@
 package dependency
 
 import (
-	"fmt"
 	"github.com/finitum/AAAAA/pkg/aur"
 	"github.com/pkg/errors"
 )
@@ -16,37 +15,36 @@ type Resolver interface {
 }
 
 type aurResolver struct {
+	url          string
 	deps         map[string]Dependency
 	infoResolver aur.InfoResolveFunction
 }
 
 func NewResolver() Resolver {
-	return NewResolverWithFunction(aur.SendInfoRequest)
+	return NewResolverWithFunction("http://localhost:5001/info/%s", aur.SendCachedInfoRequest)
 }
 
-func NewResolverWithFunction(infoResolver aur.InfoResolveFunction) Resolver {
+func NewResolverWithFunction(url string, infoResolver aur.InfoResolveFunction) Resolver {
 	return &aurResolver{
+		url:          url,
 		deps:         make(map[string]Dependency),
 		infoResolver: infoResolver,
 	}
 }
 
 func (r *aurResolver) resolveInternal(pkg string) error {
-	res, err := r.infoResolver(pkg)
+	res, err := r.infoResolver(r.url, pkg)
+
+	// Not found so not a dependency
+	if err == aur.NotInAurErr {
+		return nil
+	}
+
 	if err != nil {
 		return errors.Wrap(err, "unable to query aur for dependencies")
 	}
 
-	if res.ResultCount > 1 {
-		return errors.New(fmt.Sprintf("too many results from aur, expected 1 got %v", res.ResultCount))
-	}
-
-	// Not found, so not a dep
-	if res.ResultCount == 0 {
-		return nil
-	}
-
-	deps := append(res.Results[0].Depends, res.Results[0].MakeDepends...)
+	deps := append(res.Depends, res.MakeDepends...)
 
 	// Create dependency record
 	r.deps[pkg] = Dependency{
