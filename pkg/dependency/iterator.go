@@ -8,10 +8,10 @@ import (
 
 type Iterator struct {
 	q    *queue.Queue
-	next string
+	next Dependency
 }
 
-func NewIterator(deps []string) (*Iterator, error) {
+func NewIterator(deps []Dependency) (*Iterator, error) {
 	i := &Iterator{q: queue.New(int64(len(deps)))}
 
 	for _, dep := range deps {
@@ -37,15 +37,15 @@ func (it *Iterator) Next() bool {
 	}
 
 	// Should be safe, as this struct is the only thing directly accessing the queue
-	it.next = res[0].(string)
+	it.next = res[0].(Dependency)
 	return true
 }
 
-func (it *Iterator) Item() string {
+func (it *Iterator) Item() Dependency {
 	return it.next
 }
 
-func (it *Iterator) Push(dep string) {
+func (it *Iterator) Push(dep Dependency) {
 	err := it.q.Put(dep)
 	if err != nil {
 		// Shouldn't happen as Push() should never be called after Close().

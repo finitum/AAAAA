@@ -2,6 +2,7 @@ package repo_add
 
 import (
 	"github.com/stretchr/testify/assert"
+	"golang.org/x/sys/unix"
 	"os"
 	"os/exec"
 	"testing"
@@ -32,7 +33,13 @@ func TestIntegration(t *testing.T) {
 
 	// create tempdir to run in
 	err = os.Mkdir(dir, os.ModePerm)
-	assert.NoError(t, err)
+	if e, ok := err.(*os.PathError); ok {
+		if e.Err != unix.EEXIST {
+			t.Fatalf("Received unexpected error:\n%+v", err)
+		}
+	} else {
+		assert.NoError(t, err)
+	}
 
 	// Create a dummy packagebuild
 	file, err := os.Create(pkgbuildpath)
