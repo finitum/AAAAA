@@ -13,24 +13,25 @@ import (
 var NotInAurErr = errors.New("pkg not in aur")
 
 // SendCachedInfoRequest will do a HTTP GET request to the given url, after replacing the '%s' with the given package
-// name. It expects to receive a InfoResult, or a 204 No Content (to signal that the package is not on the AUR).
-func SendCachedInfoRequest(url, pkg string) (res InfoResult, err error) {
+// name. It expects to receive a InfoResult, or a 404 Not Found (to signal that the package is not on the AUR).
+func SendCachedInfoRequest(url, pkg string) (InfoResult, error) {
 	resp, err := http.Get(fmt.Sprintf(url, pkg))
 	if err != nil {
-		return res, errors.Wrap(err, "received error from aur cache")
+		return InfoResult{}, errors.Wrap(err, "received error from aur cache")
 	}
-	if resp.StatusCode == http.StatusNoContent {
+	if resp.StatusCode == http.StatusNotFound {
 		return InfoResult{}, NotInAurErr
 	}
 	if resp.StatusCode != http.StatusOK {
-		return InfoResult{}, errors.New(fmt.Sprintf("received error from aur cache: %s", resp.Status))
+		return InfoResult{}, errors.Errorf("received error from aur cache: %s", resp.Status)
 	}
 
+	var res InfoResult
 	err = json.NewDecoder(resp.Body).Decode(&res)
 	if err != nil {
 		log.Error(err)
 		return res, errors.Wrap(err, "couldn't decode result")
 	}
 
-	return
+	return res, nil
 }
