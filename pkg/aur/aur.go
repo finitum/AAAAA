@@ -12,6 +12,10 @@ import (
 const aurInfoQuery = "https://aur.archlinux.org/rpc/?v=5&type=info&arg=%s"
 const aurSearchQuery = "https://aur.archlinux.org/rpc/?v=5&type=search&arg=%s"
 
+// InfoResolveFunction represents a function that accepts a url and package name, and returns an InfoResult.
+// If the package is not found on the AUR it should return a NotInAurErr error.
+type InfoResolveFunction func(string, string) (InfoResult, error)
+
 type SearchResult struct {
 	ID             int
 	Name           string
@@ -32,9 +36,13 @@ type SearchResult struct {
 type InfoResult struct {
 	SearchResult
 	Depends     []string
+	OptDepends  []string
 	MakeDepends []string
+	Conflicts   []string
+	Provides    []string
 	License     []string
 	Keywords    []string
+	OnAur       bool
 }
 
 func (i *InfoResult) Render(http.ResponseWriter, *http.Request) error {

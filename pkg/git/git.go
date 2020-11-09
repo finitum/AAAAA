@@ -55,3 +55,21 @@ func Clone(path, url, branch string) (*git.Repository, error) {
 
 	return repo, nil
 }
+
+func InMemoryClone(url, branch string) (*git.Repository, error) {
+	refName := plumbing.NewBranchReferenceName(branch)
+
+	repo, err := git.Clone(memory.NewStorage(), nil, &git.CloneOptions{
+		URL:               url,
+		RemoteName:        "origin",
+		ReferenceName:     refName,
+		SingleBranch:      true,
+		Depth:             1,
+		RecurseSubmodules: git.NoRecurseSubmodules,
+	})
+	if err != nil {
+		return nil, errors.Wrap(err, "git clone")
+	}
+
+	return repo, nil
+}

@@ -18,6 +18,7 @@ type Store interface {
 }
 
 const pkgPrefix = "pkg_"
+
 type PackageStore interface {
 	// GetPackage gets a package definition from the store MUST return ErrNotExists if the package does not exist
 	GetPackage(name string) (*models.Pkg, error)
@@ -32,6 +33,7 @@ type PackageStore interface {
 }
 
 const userPrefix = "user_"
+
 type UserStore interface {
 	// GetUser gets a user from the store MUST return ErrNotExists if the user does not exist
 	GetUser(name string) (*models.User, error)
