@@ -19,18 +19,23 @@ export interface Result {
   URLPath: string;
 }
 
-export function ToPackage(result: Result | undefined): Package {
+export function ToPackage(
+  result: Result | undefined,
+  keepUrl: boolean
+): Package {
   if (typeof result === "undefined") {
     return NewPackage();
+  } else {
+    return {
+      KeepLastN: 2,
+      Name: result.Name,
+      RepoBranch: "master",
+      RepoURL: keepUrl
+        ? result.URL
+        : `https://aur.archlinux.org/${result.Name}.git`,
+      UpdateFrequency: 2 * 3600 * 1000 * 1000 * 1000
+    };
   }
-
-  return {
-    KeepLastN: 2,
-    Name: result.Name,
-    RepoBranch: "master",
-    RepoURL: `https://aur.archlinux.org/${result.Name}.git`,
-    UpdateFrequency: 2 * 3600 * 1000 * 1000 * 1000
-  };
 }
 
 export function NewResult(): Result {
@@ -68,7 +73,15 @@ const client = axios.create({
 });
 
 client.interceptors.response.use(undefined, error => {
-  notificationState.message = error.message;
+  console.log(error.response);
+  if (
+    error.response.status === 400 &&
+    error.response.request.responseURL.includes("/search/")
+  ) {
+    return Promise.resolve();
+  }
+
+  notificationState.message = error.response.response;
   notificationState.color = "#feb2b2";
   notificationState.enabled = true;
 
@@ -80,5 +93,11 @@ export async function search(term: string): Promise<Result[]> {
     return Promise.resolve([]);
   }
 
-  return client.get("/" + term).then(resp => resp.data);
+  return client.get("/" + term).then(resp => {
+    if (typeof resp !== "undefined") {
+      return resp.data;
+    } else {
+      return [];
+    }
+  });
 }

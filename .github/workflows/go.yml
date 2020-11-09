@@ -18,11 +18,14 @@ jobs:
     - name: Get dependencies
       run: go mod download
 
+    - name: Vet
+      run: go vet -v ./...
+
     - name: Build
       run: go build -v ./...
 
     - name: Test
       run: go test -v ./...
-    
-    - name: Vet
-      run: go vet -v ./...
+
+    - name: Test Race
+      run: go test -race -v ./...

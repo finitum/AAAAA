@@ -10,6 +10,7 @@ import (
 )
 
 const aurInfoQuery = "https://aur.archlinux.org/rpc/?v=5&type=info&arg=%s"
+const aurSearchQuery = "https://aur.archlinux.org/rpc/?v=5&type=search&arg=%s"
 
 type InfoResolveFunction func(string) (ExtendedInfoResults, error)
 
@@ -39,6 +40,10 @@ type InfoResult struct {
 	Provides    []string
 	License     []string
 	Keywords    []string
+}
+
+func (i *InfoResult) Render(http.ResponseWriter, *http.Request) error {
+	return nil
 }
 
 type Results []SearchResult
@@ -78,6 +83,24 @@ func SendInfoRequest(pkg string) (res ExtendedInfoResults, err error) {
 	err = json.NewDecoder(resp.Body).Decode(&res)
 	if err != nil {
 		log.Error(err)
+		return res, errors.Wrap(err, "couldn't decode result")
+	}
+
+	if res.Error != "" {
+		return res, errors.New(fmt.Sprintf("error from aur: %v", res.Error))
+	}
+
+	return
+}
+
+func SendResultsRequest(term string) (res ExtendedResults, _ error) {
+	resp, err := http.Get(fmt.Sprintf(aurSearchQuery, term))
+	if err != nil {
+		return res, errors.Wrap(err, "received error from aur rpc")
+	}
+
+	err = json.NewDecoder(resp.Body).Decode(&res)
+	if err != nil {
 		return res, errors.Wrap(err, "couldn't decode result")
 	}
 

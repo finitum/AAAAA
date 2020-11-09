@@ -14,6 +14,25 @@ type StoreAuth struct {
 	jwt *jwtauth.JWTAuth
 }
 
+func (s *StoreAuth) Update(user *models.User) error {
+	_, err := s.db.GetUser(user.Username)
+	if err == store.ErrNotExists {
+		return errors.New("user doesn't exists")
+	}
+
+	hash, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+	if err != nil {
+		return errors.Wrap(err, "bcrypt generate")
+	}
+	user.Password = string(hash)
+
+	if err := s.db.AddUser(user); err != nil {
+		return errors.Wrap(err, "adding user to db")
+	}
+
+	return nil
+}
+
 func NewStoreAuth(db store.Store, jwt *jwtauth.JWTAuth) *StoreAuth {
 	return &StoreAuth{db, jwt}
 }

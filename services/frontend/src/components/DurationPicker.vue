@@ -73,7 +73,8 @@ export default defineComponent({
       return seconds;
     }
 
-    watch(() => props.modelValue,
+    watch(
+      () => props.modelValue,
       () => {
         const seconds = props.modelValue / 1000 / 1000 / 1000;
         if (timeAsSeconds() !== seconds) {

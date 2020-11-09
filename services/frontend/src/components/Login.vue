@@ -22,7 +22,13 @@
           ></path>
         </svg>
       </div>
-      <h3 class="text-2xl font-medium bg">Login</h3>
+      <h3 v-if="mode === 'login'" class="text-2xl font-medium bg">Login</h3>
+      <h3 v-if="mode === 'new-user'" class="text-2xl font-medium bg">
+        New user
+      </h3>
+      <h3 v-if="mode === 'edit-password'" class="text-2xl font-medium bg">
+        Edit password
+      </h3>
       <form
         class="flex flex-col items-center align-middle justify-between text-center"
         @submit.prevent="ClickLogin"
@@ -34,6 +40,7 @@
             id="username"
             type="text"
             class="input-box"
+            :disabled="mode === 'edit-password'"
           />
         </span>
         <span class="flex flex-col label">
@@ -45,32 +52,119 @@
             class="input-box"
           />
         </span>
-        <button class="button w-1/3" type="submit">Login</button>
+        <button v-if="mode === 'login'" class="button w-1/3" type="submit">
+          Login
+        </button>
+        <button v-if="mode === 'new-user'" class="button w-1/3" type="submit">
+          Add
+        </button>
+        <button
+          v-if="mode === 'edit-password'"
+          class="button w-1/3"
+          type="submit"
+        >
+          Update
+        </button>
       </form>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive } from "vue";
+import {
+  defineComponent,
+  onMounted,
+  onUnmounted,
+  reactive,
+  PropType
+} from "vue";
 import { User } from "@/api/Models";
-import { Login } from "@/api/API";
+import { Login, NewUser, UpdateUser } from "@/api/API";
+import { users } from "@/api/users";
 
 export default defineComponent({
   name: "Login",
+  props: {
+    mode: {
+      type: String as PropType<"login" | "new-user" | "edit-password">,
+      default: "login"
+    },
+
+    originalUserName: {
+      type: String
+    }
+  },
   setup(props, { emit }) {
     const user: User = reactive({ Username: "", Password: "" });
 
-    function ClickLogin() {
-      Login(user).then(() => {
-        emit("login");
-        emit("close");
-      });
+    onMounted(() => {
+      if (
+        props.mode === "edit-password" &&
+        typeof props.originalUserName !== "undefined"
+      ) {
+        user.Username = props.originalUserName;
+      }
+    });
+
+    function userExists(username: string): boolean {
+      for (const u of users) {
+        if (username === u.Username) {
+          return true;
+        }
+      }
+      return false;
     }
+
+    function ClickLogin() {
+      if (props.mode === "login") {
+        Login(user).then(() => {
+          emit("login");
+          emit("close");
+        });
+      } else if (props.mode === "new-user") {
+        if (userExists(user.Username)) {
+          console.log("user exists");
+          return true;
+        }
+
+        NewUser(user).then(() => {
+          users.push(user);
+          emit("login");
+          emit("close");
+        });
+      } else if (props.mode === "edit-password") {
+        UpdateUser(user).then(() => {
+          for (let i = 0; i < users.length; i++) {
+            if (users[i].Username == user.Username) {
+              users[i] = user;
+              break;
+            }
+          }
+
+          emit("login");
+          emit("close");
+        });
+      }
+    }
+
+    function escapeHandler(e: KeyboardEvent) {
+      if (e.key === "Escape") {
+        emit("close");
+      }
+    }
+
+    onMounted(() => {
+      window.addEventListener("keydown", escapeHandler);
+    });
+
+    onUnmounted(() => {
+      window.removeEventListener("keydown", escapeHandler);
+    });
 
     return {
       user,
-      ClickLogin
+      ClickLogin,
+      userExists
     };
   }
 });
