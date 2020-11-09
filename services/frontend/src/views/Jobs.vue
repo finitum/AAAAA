@@ -1,10 +1,9 @@
 <template>
   <div class="flex flex-col w-100 items-center align-middle">
-    <div class="lg:w-2/3 w-full p-2">
-      <Search v-show="loggedIn" />
+    <div class="lg:w-1/4 w-full p-2">
       <Suspense>
         <template #default>
-          <PackageTable />
+          <JobsTable />
         </template>
         <template #fallback>
           <div>Loading...</div>
@@ -16,15 +15,13 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import PackageTable from "@/components/tables/PackageTable.vue";
-import Search from "@/components/Search.vue";
-import { loggedIn } from "@/api/API";
+import JobsTable from "@/components/tables/JobsTable.vue";
 
 export default defineComponent({
-  name: "Home",
-  components: { PackageTable, Search },
+  name: "Jobs",
+  components: { JobsTable },
   setup() {
-    return { loggedIn };
+    return {};
   }
 });
 </script>

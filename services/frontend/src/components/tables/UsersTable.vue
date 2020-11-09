@@ -68,9 +68,9 @@
 import { defineComponent, ref } from "vue";
 import { User } from "@/api/Models";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
-import Dialog from "@/components/Dialog.vue";
+import Dialog from "@/components/modals/Dialog.vue";
 import { DeleteUser } from "@/api/API";
-import Login from "@/components/Login.vue";
+import Login from "@/components/modals/Login.vue";
 import { loadUsers, users } from "@/api/users";
 
 export default defineComponent({

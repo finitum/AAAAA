@@ -1,6 +1,6 @@
 import axios from "axios";
 import { Package, User } from "@/api/Models";
-import { notificationState } from "@/components/NotificationState";
+import { notificationState } from "@/components/modals/NotificationState";
 import { ref, watch } from "vue";
 
 const client = axios.create({

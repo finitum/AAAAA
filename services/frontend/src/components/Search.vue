@@ -58,7 +58,7 @@
 <script lang="ts">
 import { defineComponent, reactive, ref } from "vue";
 import { NewResult, Result, search, ToPackage } from "@/api/AUR";
-import UpdatePackage from "@/components/UpdatePackage.vue";
+import UpdatePackage from "@/components/modals/UpdatePackage.vue";
 import { packages } from "@/api/packages";
 
 const gitUrlRegex = /(?:(?:git|ssh|https?)|(?:git@[\w.]+))(?::(\/\/)?)([\w.@:/\-~]+)(?:\.git)(\/)?/;

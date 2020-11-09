@@ -18,6 +18,7 @@ require (
 	github.com/go-chi/render v1.0.1
 	github.com/go-git/go-git/v5 v5.2.0
 	github.com/google/gofuzz v1.2.0 // indirect
+	github.com/google/uuid v1.1.2
 	github.com/gorilla/mux v1.8.0 // indirect
 	github.com/morikuni/aec v1.0.0 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect

@@ -8,8 +8,8 @@
 <script lang="ts">
 import { defineComponent, ref } from "vue";
 import Header from "@/components/Header.vue";
-import Notification from "@/components/Notification.vue";
-import Login from "@/components/Login.vue";
+import Notification from "@/components/modals/Notification.vue";
+import Login from "@/components/modals/Login.vue";
 
 export default defineComponent({
   name: "App",
