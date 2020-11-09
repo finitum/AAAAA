@@ -8,6 +8,7 @@ import (
 	"github.com/go-chi/render"
 	log "github.com/sirupsen/logrus"
 	"net/http"
+	"strconv"
 )
 
 type Routes struct {
@@ -66,25 +67,58 @@ func (rs *Routes) GetLogs(w http.ResponseWriter, r *http.Request) {
 }
 
 // GetJobs possible routes:
-//	All jobs: /job/{uuid}/logs
-// 	Get 10 jobs: /job/{uuid}/logs?limit=10
-// 	Get jobs starting at job 10: /job/{uuid}/logs?start=10
-// 	Get only the 10th job: /job/{uuid}/logs?start=10&limit=1
+//	All jobs: /jobs
+// 	Get 10 jobs: /jobs?limit=10
+// 	Get jobs starting at job 10: /jobs?start=10
+// 	Get only the 10th job: /jobs?start=10&limit=1
 //
 // # Sorting is performed before filtering and limiting
-// 	Sort jobs by time: /job/{uuid}/logs?sort=time
-// 	Sort jobs by package name: /job/{uuid}/logs?sort=name
+// 	Sort jobs by time: /jobs?sort=time
+// 	Sort jobs by package name: /jobs?sort=name
 //
 // # Filtering is performed before sorting
-//  Return only jobs with status 0 (pending) : /job/{uuid}/logs?status=0
-//  Return only jobs with a status that's not 0 (pending) : /job/{uuid}/logs?status=!0
-//  Return only jobs with `aaa` in the name: /job/{uuid}/logs?name=aaa
+//  Return only jobs with status 0 (pending) : /jobs?status=0
+//  Return only jobs with a status that's not 0 (pending) : /jobs?status=!0
+//  Return only jobs with `aaa` in the name: /jobs?name=aaa
 func (rs *Routes) GetJobs(w http.ResponseWriter, r *http.Request) {
 	limit := r.URL.Query().Get("limit")
 	start := r.URL.Query().Get("start")
 	sortKey := r.URL.Query().Get("sort")
 	statusFilter := r.URL.Query().Get("status")
 	nameFilter := r.URL.Query().Get("name")
+
+	var err error
+
+	startNum := 0
+	if start != "" {
+		startNum, err = strconv.Atoi(start)
+		if err != nil {
+			_ = render.Render(w, r, routes.ErrInvalidRequest(err))
+			log.Errorf("Couldn't convert status to number (%v)", err)
+			return
+		}
+		if startNum < 0 {
+			startNum = 0
+		}
+	}
+
+	limitNum := -1
+	if limit != "" {
+		limitNum, err = strconv.Atoi(limit)
+		if err != nil {
+			_ = render.Render(w, r, routes.ErrInvalidRequest(err))
+			log.Errorf("Couldn't convert status to number (%v)", err)
+			return
+		}
+		if limitNum < 0 {
+			limitNum = -1
+		}
+	}
+
+	// We will never return more than 5000 results
+	if limitNum > 5000 {
+		limitNum = 5000
+	}
 
 	dbJobs, err := rs.jobs.GetJobs()
 	if err != nil {
@@ -94,7 +128,7 @@ func (rs *Routes) GetJobs(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dbJobs, err = FilterJobs(dbJobs, nameFilter, statusFilter, start, sortKey, limit)
+	dbJobs, err = FilterJobs(dbJobs, nameFilter, statusFilter, sortKey, startNum, limitNum)
 	if err != nil {
 		_ = render.Render(w, r, routes.ErrInvalidRequest(err))
 		log.Errorf("Couldn't convert status to number (%v)", err)

@@ -7,7 +7,17 @@ import (
 	"strings"
 )
 
-func FilterJobs(jobs []models.Job, nameFilter, statusFilter, start, sortKey, limit string) ([]models.Job, error) {
+// FilterJobs filters, sorts and paginates a list of jobs.
+//
+// * nameFilter is a keyword which if non-empty, must be included in the package name, or otherwise the job is filtered out.
+// * statusFilter is a keyword which if non-empty, filters out any job that doesn't have a build status equal to the number
+//   passed in. This parameter may start with a `!`, which negates the filter and filters out any job with a status equal to
+//   the number passed in.
+// * sortKey is the key in the remaining list of (filtered) jobs is sorted by before it's paginated. This parameter may
+//   be either `time` or `name`. If this parameter isn't `time` or `name` it will automatically be sorted by time.
+// * start and limit are used for pagination. Jobs returned are the filtered, sorted jobs sliced by [start:start+limit].
+//   limit may be -1 to signify no limit.
+func FilterJobs(jobs []models.Job, nameFilter, statusFilter, sortKey string, start, limit int) ([]models.Job, error) {
 	if statusFilter != "" {
 		reverse := false
 		if statusFilter[0] == '!' {
@@ -55,32 +65,19 @@ func FilterJobs(jobs []models.Job, nameFilter, statusFilter, start, sortKey, lim
 		}
 	})
 
-	if start != "" {
-		startNum, err := strconv.Atoi(start)
-		if err != nil {
-			return nil, err
-		}
-
-		if len(jobs) > startNum {
-			jobs = jobs[startNum:]
+	if len(jobs) > start {
+		if limit == -1 {
+			jobs = jobs[start:]
 		} else {
-			jobs = []models.Job{}
+			end := start + limit
+			if end > len(jobs) {
+				end = len(jobs)
+			}
+
+			jobs = jobs[start:end]
 		}
-	}
-
-	limitNum := 5000
-	var err error
-
-	if limit != "" {
-		limitNum, err = strconv.Atoi(limit)
-
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	if len(jobs) > limitNum {
-		jobs = jobs[:limitNum]
+	} else {
+		jobs = []models.Job{}
 	}
 
 	return jobs, nil

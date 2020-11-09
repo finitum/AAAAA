@@ -36,7 +36,7 @@ func TestFilterLimitOne(t *testing.T) {
 	copy(jobs, testJobList)
 
 	// By defaul it sorts based on time. So it should return the latest time (bbb)
-	jobs, err := FilterJobs(jobs, "", "", "", "", "1")
+	jobs, err := FilterJobs(jobs, "", "", "", 0, 1)
 	assert.NoError(t, err)
 	assert.Equal(t, len(jobs), 1)
 	assert.Equal(t, jobs[0].PackageName, "bbb")
@@ -47,7 +47,7 @@ func TestFilterLimitTwo(t *testing.T) {
 	copy(jobs, testJobList)
 
 	// By defaul it sorts based on time. So it should return the latest two times (bbb, aaa)
-	jobs, err := FilterJobs(jobs, "", "", "", "", "2")
+	jobs, err := FilterJobs(jobs, "", "", "", 0, 2)
 	assert.NoError(t, err)
 	assert.Equal(t, len(jobs), 2)
 	assert.Equal(t, jobs[0].PackageName, "bbb")
@@ -59,7 +59,7 @@ func TestFilterLimitZero(t *testing.T) {
 	copy(jobs, testJobList)
 
 	// Limit 0 should return nothing
-	jobs, err := FilterJobs(jobs, "", "", "", "", "0")
+	jobs, err := FilterJobs(jobs, "", "", "", 0, 0)
 	assert.NoError(t, err)
 	assert.Equal(t, len(jobs), 0)
 }
@@ -69,7 +69,7 @@ func TestFilterStatusOne(t *testing.T) {
 	copy(jobs, testJobList)
 
 	// There's only one with status 1 (bbb)
-	jobs, err := FilterJobs(jobs, "", "1", "", "", "")
+	jobs, err := FilterJobs(jobs, "", "1", "", 0, -1)
 	assert.NoError(t, err)
 	assert.Equal(t, len(jobs), 1)
 	assert.Equal(t, jobs[0].PackageName, "aaa")
@@ -80,7 +80,7 @@ func TestFilterStatusZero(t *testing.T) {
 	copy(jobs, testJobList)
 
 	// There are two  with status 0 (bbb and ccc) but ccc has the lowest time so should come last
-	jobs, err := FilterJobs(jobs, "", "0", "", "", "")
+	jobs, err := FilterJobs(jobs, "", "0", "", 0, -1)
 	assert.NoError(t, err)
 	assert.Equal(t, len(jobs), 2)
 	assert.Equal(t, jobs[0].PackageName, "bbb")
@@ -92,7 +92,7 @@ func TestFilterStatusNotZero(t *testing.T) {
 	copy(jobs, testJobList)
 
 	// There are two with status 0 (bbb and ccc) so !0 should return a
-	jobs, err := FilterJobs(jobs, "", "!0", "", "", "")
+	jobs, err := FilterJobs(jobs, "", "!0", "", 0, -1)
 	assert.NoError(t, err)
 	assert.Equal(t, len(jobs), 1)
 	assert.Equal(t, jobs[0].PackageName, "aaa")
@@ -103,7 +103,7 @@ func TestFilterNameExact(t *testing.T) {
 	copy(jobs, testJobList)
 
 	// There are two with status 0 (bbb and ccc) so !0 should return a
-	jobs, err := FilterJobs(jobs, "aaa", "", "", "", "")
+	jobs, err := FilterJobs(jobs, "aaa", "", "", 0, -1)
 	assert.NoError(t, err)
 	assert.Equal(t, len(jobs), 1)
 	assert.Equal(t, jobs[0].PackageName, "aaa")
@@ -114,19 +114,18 @@ func TestFilterNamePartial(t *testing.T) {
 	copy(jobs, testJobList)
 
 	// There are two with status 0 (bbb and ccc) so !0 should return a
-	jobs, err := FilterJobs(jobs, "a", "", "", "", "")
+	jobs, err := FilterJobs(jobs, "a", "", "", 0, -1)
 	assert.NoError(t, err)
 	assert.Equal(t, len(jobs), 1)
 	assert.Equal(t, jobs[0].PackageName, "aaa")
 }
-
 
 func TestFilterSortTime(t *testing.T) {
 	jobs := make([]models.Job, len(testJobList))
 	copy(jobs, testJobList)
 
 	// Sort based on time explicitly
-	jobs, err := FilterJobs(jobs, "", "", "", "time", "")
+	jobs, err := FilterJobs(jobs, "", "", "time", 0, -1)
 	assert.NoError(t, err)
 	assert.Equal(t, len(jobs), 3)
 	assert.Equal(t, jobs[0].PackageName, "bbb")
@@ -139,7 +138,7 @@ func TestFilterSortNothing(t *testing.T) {
 	copy(jobs, testJobList)
 
 	// Sorting on nothing also sorts on time by default
-	jobs, err := FilterJobs(jobs, "", "", "", "", "")
+	jobs, err := FilterJobs(jobs, "", "", "", 0, -1)
 	assert.NoError(t, err)
 	assert.Equal(t, len(jobs), 3)
 	assert.Equal(t, jobs[0].PackageName, "bbb")
@@ -151,7 +150,7 @@ func TestFilterSortName(t *testing.T) {
 	jobs := make([]models.Job, len(testJobList))
 	copy(jobs, testJobList)
 
-	jobs, err := FilterJobs(jobs, "", "", "", "name", "")
+	jobs, err := FilterJobs(jobs, "", "", "name", 0, -1)
 	assert.NoError(t, err)
 	assert.Equal(t, len(jobs), 3)
 	assert.Equal(t, jobs[0].PackageName, "aaa")
@@ -164,7 +163,7 @@ func TestFilterStartZero(t *testing.T) {
 	copy(jobs, testJobList)
 
 	// Starting at zero is the default
-	jobs, err := FilterJobs(jobs, "", "", "0", "name", "")
+	jobs, err := FilterJobs(jobs, "", "", "name", 0, -1)
 	assert.NoError(t, err)
 	assert.Equal(t, len(jobs), 3)
 	assert.Equal(t, jobs[0].PackageName, "aaa")
@@ -177,7 +176,7 @@ func TestFilterStartOne(t *testing.T) {
 	copy(jobs, testJobList)
 
 	// Starting at zero is the default
-	jobs, err := FilterJobs(jobs, "", "", "1", "name", "")
+	jobs, err := FilterJobs(jobs, "", "", "name", 1, -1)
 	assert.NoError(t, err)
 	assert.Equal(t, len(jobs), 2)
 	assert.Equal(t, jobs[0].PackageName, "bbb")
