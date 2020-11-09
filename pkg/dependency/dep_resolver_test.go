@@ -35,8 +35,8 @@ func testInfoResolver(_, pkg string) (aur.InfoResult, error) {
 
 func TestNormal(t *testing.T) {
 	exp := make(map[string]Dependency)
-	exp["non-yay"] = Dependency{name: "non-yay", dependencies: []string{"minecraft"}}
-	exp["minecraft"] = Dependency{name: "minecraft", dependencies: []string{}}
+	exp["non-yay"] = Dependency{Name: "non-yay", Dependencies: []string{"minecraft"}}
+	exp["minecraft"] = Dependency{Name: "minecraft", Dependencies: []string{}}
 
 	actual := make([]Dependency, 0, len(exp))
 	r := NewResolverWithFunction("", testInfoResolver)
@@ -66,9 +66,9 @@ func TestCircular(t *testing.T) {
 
 	go func() {
 		exp := make(map[string]Dependency)
-		exp["circ-b"] = Dependency{name: "circ-b", dependencies: []string{"circ-a", "non-yay", "minecraft"}}
-		exp["non-yay"] = Dependency{name: "non-yay", dependencies: []string{"minecraft"}}
-		exp["minecraft"] = Dependency{name: "minecraft", dependencies: []string{}}
+		exp["circ-b"] = Dependency{Name: "circ-b", Dependencies: []string{"circ-a", "non-yay", "minecraft"}}
+		exp["non-yay"] = Dependency{Name: "non-yay", Dependencies: []string{"minecraft"}}
+		exp["minecraft"] = Dependency{Name: "minecraft", Dependencies: []string{}}
 
 		actual := make([]Dependency, 0, len(exp))
 		r := NewResolverWithFunction("", testInfoResolver)
@@ -101,7 +101,7 @@ func TestWithCache(t *testing.T) {
 	assert.NoError(t, err)
 
 	for it.Next() {
-		fmt.Printf("%v\n", it.Item())
+		fmt.Printf("Found dependency: %v\n", it.Item())
 	}
 }
 
@@ -109,11 +109,11 @@ func verify(exp map[string]Dependency, actual []Dependency, t *testing.T) {
 	assert.Equal(t, len(exp), len(actual))
 
 	for _, dep := range actual {
-		eDep, ok := exp[dep.name]
+		eDep, ok := exp[dep.Name]
 		assert.True(t, ok)
 
-		sort.Strings(eDep.dependencies)
-		sort.Strings(dep.dependencies)
-		assert.EqualValues(t, eDep.dependencies, dep.dependencies)
+		sort.Strings(eDep.Dependencies)
+		sort.Strings(dep.Dependencies)
+		assert.EqualValues(t, eDep.Dependencies, dep.Dependencies)
 	}
 }

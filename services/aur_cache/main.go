@@ -66,7 +66,7 @@ func info(cache store.Cache) http.HandlerFunc {
 		entry, err := cache.GetInfoEntry(name)
 		if err == nil {
 			if !entry.OnAur {
-				http.Error(w, "no results", http.StatusNotFound)
+				http.Error(w, "no results", http.StatusNoContent)
 				return
 			}
 
@@ -91,7 +91,7 @@ func info(cache store.Cache) http.HandlerFunc {
 				log.Error("saving to cache failed")
 			}
 
-			http.Error(w, "no results", http.StatusNotFound)
+			http.Error(w, "no results", http.StatusNoContent)
 			return
 		}
 

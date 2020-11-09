@@ -1,3 +1,29 @@
+/*
+Package dependency can be used to resolve Dependencies of packages. The default resolver returned by NewResolver()
+will return a resolver that connects to a local aur cache at http://localhost:5001 to resolve Dependencies.
+
+Basic example:
+
+	package main
+
+	import (
+		"fmt"
+		"github.com/finitum/AAAAA/pkg/dependency"
+	)
+
+	func main() {
+		r := dependency.NewResolver()
+
+		it, err := r.Resolve("lib32-eudev")
+		if err != nil {
+			panic(err)
+		}
+
+		for it.Next() {
+			fmt.Printf("Found dependency: %v\n", it.Item())
+		}
+	}
+*/
 package dependency
 
 import (
@@ -5,12 +31,23 @@ import (
 	"github.com/pkg/errors"
 )
 
+// Dependency represents a dependency of an AUR package.
+// This dependency has a name, and a slice of name of dependencies of this dependency.
 type Dependency struct {
-	name         string
-	dependencies []string
+	Name         string
+	Dependencies []string
 }
 
+/*
+Resolver represents an a resolver, which is able to resolve all dependencies of a given package with the given name.
+
+Most use cases can be solved by using a custom InfoResolveFunction in combination with a custom URL, but it is possible
+to provide an alternative implementation of the default resolver by implementing this interface.
+*/
 type Resolver interface {
+	// Resolve accepts a string representing the package name, and will return an Iterator, which returns all
+	// (in)direct dependencies of the given name in no particular order. Furthermore, it is legal for the Iterator
+	// to contain a set of dependencies which have a circular relation, the consumer should handle this case.
 	Resolve(pkg string) (*Iterator, error)
 }
 
@@ -20,10 +57,15 @@ type aurResolver struct {
 	infoResolver aur.InfoResolveFunction
 }
 
+// NewResolver returns a default Resolver. This resolver uses aur.SendCachedInfoRequest to make requests to the
+// default url 'http://localhost:5001/info/%s'.
 func NewResolver() Resolver {
 	return NewResolverWithFunction("http://localhost:5001/info/%s", aur.SendCachedInfoRequest)
 }
 
+// NewResolverWithFunction returns a Resolver, which uses the given url. The url format depends on the given
+// aur.InfoResolveFunction, but for the default function aur.SendCachedInfoRequest the url should contain one '%s',
+// which is filled with the current package name.
 func NewResolverWithFunction(url string, infoResolver aur.InfoResolveFunction) Resolver {
 	return &aurResolver{
 		url:          url,
@@ -48,8 +90,8 @@ func (r *aurResolver) resolveInternal(pkg string) error {
 
 	// Create dependency record
 	r.deps[pkg] = Dependency{
-		name:         pkg,
-		dependencies: deps,
+		Name:         pkg,
+		Dependencies: deps,
 	}
 
 	// Go through all dependencies
@@ -87,8 +129,8 @@ func (r *aurResolver) Resolve(pkg string) (*Iterator, error) {
 
 	res := make([]Dependency, 0, len(r.deps))
 	for _, dep := range r.deps {
-		if dep.name != pkg {
-			dep.dependencies = r.filterDependencies(dep.dependencies)
+		if dep.Name != pkg {
+			dep.Dependencies = r.filterDependencies(dep.Dependencies)
 			res = append(res, dep)
 		}
 	}
