@@ -1,9 +1,9 @@
 package auth
 
 import (
-	"github.com/finitum/AAAAA/pkg/models"
 	"github.com/finitum/aurum/clients/go"
 	"github.com/pkg/errors"
+	log "github.com/sirupsen/logrus"
 )
 
 type Aurum struct {
@@ -19,8 +19,8 @@ func NewAurum(url string) (*Aurum, error) {
 	return &Aurum{ au }, nil
 }
 
-func (a *Aurum) Login(user *models.User) (string, error) {
-	tp, err := a.au.Login(user.Username, user.Password)
+func (a *Aurum) Login(user string, pass string) (string, error) {
+	tp, err := a.au.Login(user, pass)
 	if err != nil {
 		return "", err
 	}
@@ -28,15 +28,21 @@ func (a *Aurum) Login(user *models.User) (string, error) {
 	return tp.LoginToken, nil
 }
 
-func (a *Aurum) Register(user *models.User) error {
-	return errors.Wrap(a.au.Register(user.Username, user.Password, "nomail@AAAAA"), "aurum signup failed")
+func (a *Aurum) Register(user FullUser) error {
+	if user.Email == "" {
+		user.Email = "no-email"
+	}
+
+	err := a.au.Register(user.Username, user.Password, user.Email)
+	return errors.Wrap(err, "aurum signup failed")
 }
 
-func (a *Aurum) Update(user *models.User, token string) error {
+func (a *Aurum) Update(user FullUser, token string) error {
+	log.Error("updating user unsupported")
 	return errors.New("unsupported")
 }
 
-func (a *Aurum) Verify(token string) (Claims, bool) {
+func (a *Aurum) Verify(token string) (ret Claims, _ bool) {
 	claims, err := a.au.Verify(token)
 	if err != nil {
 		return Claims{}, false
@@ -46,8 +52,8 @@ func (a *Aurum) Verify(token string) (Claims, bool) {
 		return Claims{}, false
 	}
 
-	return Claims{
-		Username: claims.Username,
-		RawToken: token,
-	}, !claims.Refresh
+
+	ret.Username = claims.Username
+	ret.RawToken = token
+	return ret, !claims.Refresh
 }

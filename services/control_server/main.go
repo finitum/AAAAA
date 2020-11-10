@@ -1,12 +1,9 @@
 package main
 
 import (
-	"crypto/rand"
-	"encoding/base64"
 	"github.com/finitum/AAAAA/internal/cors"
 	"github.com/finitum/AAAAA/pkg/auth"
 	"github.com/finitum/AAAAA/pkg/executor"
-	"github.com/finitum/AAAAA/pkg/models"
 	"github.com/finitum/AAAAA/pkg/store"
 	"github.com/finitum/AAAAA/services/control_server/config"
 	"github.com/finitum/AAAAA/services/control_server/routes"
@@ -33,10 +30,12 @@ func main() {
 
 	// Auth service
 	//auths := auth.NewStoreAuth(db, cfg.JWTKey)
-	auths, err := auth.NewAurum("http://localhost:8042")
+	as, err := auth.NewAurum("http://localhost:8042")
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	au := auth.NewAuthenticator(as, db)
 
 	// Create initial user
 	//initialUser(db, auths)
@@ -56,7 +55,7 @@ func main() {
 	}
 
 	// Router
-	rs := routes.New(cfg, db, auths, exec)
+	rs := routes.New(cfg, db, au, exec)
 
 	r := chi.NewRouter()
 	r.Use(middleware.StripSlashes)
@@ -75,7 +74,7 @@ func main() {
 	// Protected Routes
 	r.Group(func(r chi.Router) {
 		// Veirfy jwt tokens
-		r.Use(auth.VerificationMiddleware(auths))
+		r.Use(au.VerificationMiddleware)
 
 		//r.Use(corsHandler)
 
@@ -94,31 +93,4 @@ func main() {
 	})
 
 	log.Fatal(http.ListenAndServe(cfg.Address, r))
-}
-
-func initialUser(db store.Store, auths auth.StoreAuth) {
-	users, err := db.AllUserNames()
-	if err != nil {
-		log.Fatal(err)
-	}
-	if len(users) != 0 {
-		return
-	}
-
-	log.Info("Creating default admin user as no users were found")
-	buf := make([]byte, 32)
-	_, err = rand.Read(buf)
-	if err != nil {
-		log.Fatal(err)
-	}
-	pass := base64.StdEncoding.EncodeToString(buf)
-
-	if err := auths.Register(&models.User{
-		Username: "admin",
-		Password: pass,
-	}); err != nil {
-		log.Fatal(err)
-	}
-
-	log.Infof("|> username: admin, password: %s \n", pass)
 }

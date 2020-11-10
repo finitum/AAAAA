@@ -10,13 +10,13 @@ import (
 
 type Routes struct {
 	cfg  *config.Config
+	auth *auth.Authenticator
 	db   store.PackageStore
-	auth auth.AuthenticationService
 	exec executor.Executor
 }
 
-func New(cfg *config.Config, db store.PackageStore, auth auth.AuthenticationService, exec executor.Executor) *Routes {
-	return &Routes{cfg, db, auth, exec}
+func New(cfg *config.Config, db store.PackageStore, auth *auth.Authenticator, exec executor.Executor) *Routes {
+	return &Routes{cfg, auth, db, exec}
 }
 
 func (*Routes) HelloWorld(w http.ResponseWriter, r *http.Request) {

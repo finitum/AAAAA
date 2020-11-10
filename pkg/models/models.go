@@ -53,17 +53,14 @@ func (p *Pkg) Bind(*http.Request) error {
 
 type User struct {
 	Username string
-	Password string
 }
 
 func (u *User) Render(w http.ResponseWriter, r *http.Request) error {
-	u.Password = ""
-
 	return nil
 }
 
 func (u *User) Bind(*http.Request) error {
-	if u.Username == "" || u.Password == "" {
+	if u.Username == "" {
 		return errors.New("invalid user")
 	}
 

@@ -80,7 +80,6 @@ func TestBadger_AllPackages(t *testing.T) {
 func TestBadger_AddGetDelUser(t *testing.T) {
 	tstUser := models.User{
 		Username: "testkees",
-		Password: "encryptedyes?",
 	}
 
 	storePath := os.TempDir() + "/TestBadger_AddUser"
@@ -103,11 +102,9 @@ func TestBadger_AddGetDelUser(t *testing.T) {
 func TestBadger_AllUserNames(t *testing.T) {
 	tstUser := models.User{
 		Username: "yoink",
-		Password: "rot26bestencryption",
 	}
 	tstUser2 := models.User{
 		Username: "; DROP TABLE 'USERS';--",
-		Password: "2xrot13bestencryption",
 	}
 
 	storePath := os.TempDir() + "/TestBadger_AllUserNames"
