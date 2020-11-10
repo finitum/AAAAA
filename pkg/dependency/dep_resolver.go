@@ -39,7 +39,7 @@ type Dependency struct {
 }
 
 /*
-Resolver represents an a resolver, which is able to resolve all dependencies of a given package with the given name.
+Resolver represents a resolver, which is able to resolve all dependencies of a given package with the given name.
 
 Most use cases can be solved by using a custom InfoResolveFunction in combination with a custom URL, but it is possible
 to provide an alternative implementation of the default resolver by implementing this interface.

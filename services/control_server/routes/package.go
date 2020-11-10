@@ -3,13 +3,13 @@ package routes
 import (
 	"context"
 	"errors"
+	"github.com/finitum/AAAAA/pkg/auth"
 	"github.com/finitum/AAAAA/pkg/executor"
 	"github.com/finitum/AAAAA/pkg/git"
 	"github.com/finitum/AAAAA/pkg/models"
 	"github.com/finitum/AAAAA/pkg/repo_add"
 	"github.com/finitum/AAAAA/pkg/store"
 	"github.com/go-chi/chi"
-	"github.com/go-chi/jwtauth"
 	"github.com/go-chi/render"
 	"github.com/go-git/go-git/v5/plumbing"
 	log "github.com/sirupsen/logrus"
@@ -104,13 +104,13 @@ func (rs *Routes) TriggerBuild(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, _, err := jwtauth.FromContext(r.Context())
-	if err != nil {
+	claims, success := auth.FromContext(r.Context())
+	if !success {
 		_ = render.Render(w, r, ErrServerError(err))
 		return
 	}
 
-	tokenStr := token.Raw
+	tokenStr := claims.RawToken
 
 	go func() {
 		ctx := context.Background()

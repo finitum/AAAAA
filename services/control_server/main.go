@@ -3,7 +3,6 @@ package main
 import (
 	"crypto/rand"
 	"encoding/base64"
-	"github.com/dgrijalva/jwt-go"
 	"github.com/finitum/AAAAA/internal/cors"
 	"github.com/finitum/AAAAA/pkg/auth"
 	"github.com/finitum/AAAAA/pkg/executor"
@@ -13,7 +12,6 @@ import (
 	"github.com/finitum/AAAAA/services/control_server/routes"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
-	"github.com/go-chi/jwtauth"
 	"github.com/go-chi/render"
 	log "github.com/sirupsen/logrus"
 	"net/http"
@@ -32,13 +30,16 @@ func main() {
 	}
 	defer db.Close()
 
-	tokenAuth := jwtauth.New(jwt.SigningMethodHS384.Name, []byte(cfg.JWTKey), nil)
 
 	// Auth service
-	auths := auth.NewStoreAuth(db, tokenAuth)
+	//auths := auth.NewStoreAuth(db, cfg.JWTKey)
+	auths, err := auth.NewAurum("http://localhost:8042")
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	// Create initial user
-	initialUser(db, auths)
+	//initialUser(db, auths)
 
 	// Executor
 	var exec executor.Executor
@@ -73,11 +74,9 @@ func main() {
 
 	// Protected Routes
 	r.Group(func(r chi.Router) {
-		// Seek, verify and validate JWT tokens
-		r.Use(jwtauth.Verifier(tokenAuth))
+		// Veirfy jwt tokens
+		r.Use(auth.VerificationMiddleware(auths))
 
-		// Handle valid / invalid tokens.
-		r.Use(jwtauth.Authenticator)
 		//r.Use(corsHandler)
 
 		r.Post("/user", rs.AddUser)
@@ -97,7 +96,7 @@ func main() {
 	log.Fatal(http.ListenAndServe(cfg.Address, r))
 }
 
-func initialUser(db store.Store, auths auth.AuthenticationService) {
+func initialUser(db store.Store, auths auth.StoreAuth) {
 	users, err := db.AllUserNames()
 	if err != nil {
 		log.Fatal(err)

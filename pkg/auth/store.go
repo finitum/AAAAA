@@ -14,7 +14,32 @@ type StoreAuth struct {
 	jwt *jwtauth.JWTAuth
 }
 
-func (s *StoreAuth) Update(user *models.User) error {
+func NewStoreAuth(db store.Store, jwtkey string) *StoreAuth {
+	return &StoreAuth{
+		db:  db,
+		jwt: jwtauth.New(jwt.SigningMethodHS384.Name, []byte(jwtkey), nil),
+	}
+}
+
+func (s *StoreAuth) Verify(token string) (Claims, bool) {
+	dec, err := s.jwt.Decode(token)
+	if err != nil {
+		return Claims{}, false
+	}
+
+	if !dec.Valid {
+		return Claims{}, false
+	}
+
+	claims := dec.Claims.(*jwt.StandardClaims)
+
+	return Claims{
+		Username: claims.Subject,
+		RawToken: token,
+	}, dec.Valid
+}
+
+func (s *StoreAuth) Update(user *models.User, _ string) error {
 	_, err := s.db.GetUser(user.Username)
 	if err == store.ErrNotExists {
 		return errors.New("user doesn't exists")
@@ -33,9 +58,6 @@ func (s *StoreAuth) Update(user *models.User) error {
 	return nil
 }
 
-func NewStoreAuth(db store.Store, jwt *jwtauth.JWTAuth) *StoreAuth {
-	return &StoreAuth{db, jwt}
-}
 
 func (s *StoreAuth) Login(user *models.User) (string, error) {
 	dbUser, err := s.db.GetUser(user.Username)

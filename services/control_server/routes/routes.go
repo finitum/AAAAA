@@ -10,12 +10,12 @@ import (
 
 type Routes struct {
 	cfg  *config.Config
-	db   store.Store
+	db   store.PackageStore
 	auth auth.AuthenticationService
 	exec executor.Executor
 }
 
-func New(cfg *config.Config, db store.Store, auth auth.AuthenticationService, exec executor.Executor) *Routes {
+func New(cfg *config.Config, db store.PackageStore, auth auth.AuthenticationService, exec executor.Executor) *Routes {
 	return &Routes{cfg, db, auth, exec}
 }
 

@@ -2,6 +2,7 @@ package routes
 
 import (
 	"encoding/json"
+	"github.com/finitum/AAAAA/pkg/auth"
 	"github.com/finitum/AAAAA/pkg/models"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/render"
@@ -101,7 +102,8 @@ func (rs *Routes) UpdateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := rs.auth.Update(&user)
+	claims, _ := auth.FromContext(r.Context())
+	err := rs.auth.Update(&user, claims.RawToken)
 	if err != nil {
 		_ = render.Render(w, r, ErrServerError(err))
 		return
