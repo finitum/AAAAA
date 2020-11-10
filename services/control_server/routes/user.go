@@ -2,7 +2,7 @@ package routes
 
 import (
 	"encoding/json"
-	"github.com/finitum/AAAAA/pkg/models"
+	"github.com/finitum/AAAAA/pkg/auth"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/render"
 	log "github.com/sirupsen/logrus"
@@ -10,14 +10,14 @@ import (
 )
 
 func (rs *Routes) Login(w http.ResponseWriter, r *http.Request) {
-	var user models.User
+	var user auth.FullUser
 
 	if err := render.Bind(r, &user); err != nil {
 		_ = render.Render(w, r, ErrInvalidRequest(err))
 		return
 	}
 
-	token, err := rs.auth.Login(&user)
+	token, err := rs.auth.Login(user.Username, user.Password)
 	if err != nil {
 		_ = render.Render(w, r, ErrUnauthorized())
 		return
@@ -39,14 +39,14 @@ func (rs *Routes) Login(w http.ResponseWriter, r *http.Request) {
 }
 
 func (rs *Routes) AddUser(w http.ResponseWriter, r *http.Request) {
-	var user models.User
+	var user auth.FullUser
 
 	if err := render.Bind(r, &user); err != nil {
 		_ = render.Render(w, r, ErrInvalidRequest(err))
 		return
 	}
 
-	if err := rs.auth.Register(&user); err != nil {
+	if err := rs.auth.Register(user); err != nil {
 		_ = render.Render(w, r, ErrServerError(err))
 		return
 	}
@@ -55,7 +55,7 @@ func (rs *Routes) AddUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func (rs *Routes) GetUsers(w http.ResponseWriter, r *http.Request) {
-	dbUsers, err := rs.db.AllUsers()
+	dbUsers, err := rs.auth.GetUsers()
 	if err != nil {
 		_ = render.Render(w, r, ErrServerError(err))
 		log.Errorf("failed to get users (%v)", err)
@@ -73,7 +73,7 @@ func (rs *Routes) GetUsers(w http.ResponseWriter, r *http.Request) {
 func (rs *Routes) DeleteUser(w http.ResponseWriter, r *http.Request) {
 	username := chi.URLParam(r, "username")
 
-	allUsers, err := rs.db.AllUserNames()
+	allUsers, err := rs.auth.GetUserNames()
 	if err != nil {
 		_ = render.Render(w, r, ErrServerError(err))
 		log.Errorf("failed to get users (%v)", err)
@@ -85,7 +85,7 @@ func (rs *Routes) DeleteUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = rs.db.DelUser(username)
+	err = rs.auth.DeleteUser(username)
 	if err != nil {
 		_ = render.Render(w, r, ErrServerError(err))
 		log.Errorf("failed to remove user (%v)", err)
@@ -94,14 +94,15 @@ func (rs *Routes) DeleteUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func (rs *Routes) UpdateUser(w http.ResponseWriter, r *http.Request) {
-	var user models.User
+	var user auth.FullUser
 
 	if err := render.Bind(r, &user); err != nil {
 		_ = render.Render(w, r, ErrInvalidRequest(err))
 		return
 	}
 
-	err := rs.auth.Update(&user)
+	claims, _ := auth.FromContext(r.Context())
+	err := rs.auth.Update(user, claims.RawToken)
 	if err != nil {
 		_ = render.Render(w, r, ErrServerError(err))
 		return

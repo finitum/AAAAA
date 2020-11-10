@@ -14,6 +14,7 @@ require (
 	github.com/docker/docker v17.12.0-ce-rc1.0.20200916142827-bd33bbf0497b+incompatible
 	github.com/docker/go-connections v0.4.0 // indirect
 	github.com/docker/go-units v0.4.0 // indirect
+	github.com/finitum/aurum v0.0.0-20201110134241-2af7867ae837
 	github.com/go-chi/chi v4.1.2+incompatible
 	github.com/go-chi/jwtauth v4.0.4+incompatible
 	github.com/go-chi/render v1.0.1
@@ -26,9 +27,9 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.7.0
 	github.com/stretchr/testify v1.6.1
-	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
+	golang.org/x/crypto v0.0.0-20201016220609-9e8e0b390897
 	golang.org/x/net v0.0.0-20201031054903-ff519b6c9102 // indirect
-	golang.org/x/sys v0.0.0-20200930185726-fdedc70b468f
+	golang.org/x/sys v0.0.0-20201020230747-6e5568b54d1a
 	golang.org/x/time v0.0.0-20200630173020-3af7569d3a1e // indirect
 	google.golang.org/grpc v1.33.1 // indirect
 	gotest.tools v2.2.0+incompatible // indirect
