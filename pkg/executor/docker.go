@@ -56,7 +56,7 @@ func (d *DockerExecutor) BuildPackage(ctx context.Context, cfg *Config) error {
 		},
 	}, &container.HostConfig{
 		AutoRemove: true,
-	}, nil, "AAAAA-"+cfg.Package.Name)
+	}, nil, nil, "AAAAA-"+cfg.Package.Name)
 	if err != nil {
 		return errors.Wrap(err, "docker container create")
 	}
