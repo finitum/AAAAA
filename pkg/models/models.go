@@ -2,12 +2,13 @@ package models
 
 import (
 	"errors"
-	"github.com/go-git/go-git/v5/plumbing"
 	"net/http"
 	"time"
+
+	"github.com/go-git/go-git/v5/plumbing"
 )
 
-// Pkg is an archlinux package
+// Pkg is an archlinux package.
 type Pkg struct {
 	// Name is the name of the package (unique)
 	Name string
@@ -25,12 +26,12 @@ type Pkg struct {
 	// TODO: Version?
 }
 
-// Render will run before marshalling a Pkg, good place to do pre-processing
+// Render will run before marshalling a Pkg, good place to do pre-processing.
 func (p *Pkg) Render(http.ResponseWriter, *http.Request) error {
 	return nil
 }
 
-// Bind will run after unmarshalling a Pkg, good place to do post-processing
+// Bind will run after unmarshalling a Pkg, good place to do post-processing.
 func (p *Pkg) Bind(*http.Request) error {
 	if p.Name == "" || p.RepoURL == "" {
 		return errors.New("package is missing required fields Name and/or RepoURL")

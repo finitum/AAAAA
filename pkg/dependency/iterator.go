@@ -42,7 +42,7 @@ func (it *Iterator) Next() bool {
 	}
 
 	// Should be safe, as this struct is the only thing directly accessing the queue
-	it.next = res[0].(Dependency)
+	it.next, _ = res[0].(Dependency)
 	return true
 }
 

@@ -2,11 +2,13 @@ package routes
 
 import (
 	"encoding/json"
-	"github.com/finitum/AAAAA/pkg/models"
+	"net/http"
+
 	"github.com/go-chi/chi"
 	"github.com/go-chi/render"
 	log "github.com/sirupsen/logrus"
-	"net/http"
+
+	"github.com/finitum/AAAAA/pkg/models"
 )
 
 func (rs *Routes) Login(w http.ResponseWriter, r *http.Request) {
@@ -90,7 +92,6 @@ func (rs *Routes) DeleteUser(w http.ResponseWriter, r *http.Request) {
 		_ = render.Render(w, r, ErrServerError(err))
 		log.Errorf("failed to remove user (%v)", err)
 	}
-
 }
 
 func (rs *Routes) UpdateUser(w http.ResponseWriter, r *http.Request) {

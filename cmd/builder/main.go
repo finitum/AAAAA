@@ -2,14 +2,15 @@ package main
 
 import (
 	"encoding/json"
-	"github.com/finitum/AAAAA/pkg/executor"
-	"github.com/finitum/AAAAA/pkg/git"
-	"github.com/finitum/AAAAA/pkg/makepkg"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
 	"strings"
+
+	"github.com/finitum/AAAAA/pkg/executor"
+	"github.com/finitum/AAAAA/pkg/git"
+	"github.com/finitum/AAAAA/pkg/makepkg"
 )
 
 func main() {
@@ -41,17 +42,20 @@ func main() {
 		log.Fatalf("Getting HEAD failed: %v", err)
 	}
 
-	if err := os.Chdir(dir); err != nil {
-		log.Fatal("Couldn't cd into git repo")
+	if cdErr := os.Chdir(dir); cdErr != nil {
+		log.Fatalf("Couldn't cd into git repo: %v", cdErr)
 	}
 
 	log.Println("Building package")
-	if _, _, err := makepkg.Build(); err != nil {
-		log.Fatalf("Building package failed %v", err)
+	if _, _, buildErr := makepkg.Build(); buildErr != nil {
+		log.Fatalf("Building package failed %v", buildErr)
 	}
 
 	// ls *.pkg.*
 	files, err := ioutil.ReadDir(".")
+	if err != nil {
+		log.Fatalf("Building reading current dir %v", err)
+	}
 	var found string
 	for _, file := range files {
 		fname := file.Name()

@@ -3,14 +3,17 @@ package aur
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/pkg/errors"
-	log "github.com/sirupsen/logrus"
 	"net/http"
 	"sort"
+
+	"github.com/pkg/errors"
+	log "github.com/sirupsen/logrus"
 )
 
-const aurInfoQuery = "https://aur.archlinux.org/rpc/?v=5&type=info&arg=%s"
-const aurSearchQuery = "https://aur.archlinux.org/rpc/?v=5&type=search&arg=%s"
+const (
+	aurInfoQuery   = "https://aur.archlinux.org/rpc/?v=5&type=info&arg=%s"
+	aurSearchQuery = "https://aur.archlinux.org/rpc/?v=5&type=search&arg=%s"
+)
 
 // InfoResolveFunction represents a function that accepts a url and package name, and returns an InfoResult.
 // If the package is not found on the AUR it should return a NotInAurErr error.

@@ -2,11 +2,12 @@ package auth
 
 import (
 	"github.com/dgrijalva/jwt-go"
-	"github.com/finitum/AAAAA/pkg/models"
-	"github.com/finitum/AAAAA/pkg/store"
 	"github.com/go-chi/jwtauth"
 	"github.com/pkg/errors"
 	"golang.org/x/crypto/bcrypt"
+
+	"github.com/finitum/AAAAA/pkg/models"
+	"github.com/finitum/AAAAA/pkg/store"
 )
 
 type StoreAuth struct {
@@ -43,14 +44,13 @@ func (s *StoreAuth) Login(user *models.User) (string, error) {
 		return "", errors.Wrap(err, "user not in database")
 	}
 
-	if err := bcrypt.CompareHashAndPassword([]byte(dbUser.Password), []byte(user.Password)); err != nil {
-		return "", errors.Wrap(err, "password wrong or invalid")
+	if checkErr := bcrypt.CompareHashAndPassword([]byte(dbUser.Password), []byte(user.Password)); checkErr != nil {
+		return "", errors.Wrap(checkErr, "password wrong or invalid")
 	}
 
 	_, tokenString, err := s.jwt.Encode(jwt.StandardClaims{Subject: dbUser.Username, Audience: "user"})
 	if err != nil {
 		return "", errors.Wrap(err, "couldn't encode jwt token")
-
 	}
 
 	return tokenString, nil

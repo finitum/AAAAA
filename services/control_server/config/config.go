@@ -1,12 +1,13 @@
 package config
 
 import (
-	log "github.com/sirupsen/logrus"
 	"os"
 	"path"
+
+	log "github.com/sirupsen/logrus"
 )
 
-// Config is the configuration used by the control server
+// Config is the configuration used by the control server.
 type Config struct {
 	// StoreLocation is the Location where the database is stored
 	StoreLocation string
@@ -28,7 +29,7 @@ type Config struct {
 	KubeNamespace string `json:",omitempty"`
 }
 
-// DevDefault returns a default set of config values which generally work for local development
+// DevDefault returns a default set of config values which generally work for local development.
 func DevDefault() *Config {
 	root := "./AAAAA/"
 

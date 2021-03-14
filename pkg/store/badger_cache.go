@@ -4,8 +4,9 @@ import (
 	"bytes"
 	"encoding/gob"
 	"github.com/dgraph-io/badger/v2"
-	"github.com/finitum/AAAAA/pkg/aur"
 	"github.com/pkg/errors"
+
+	"github.com/finitum/AAAAA/pkg/aur"
 )
 
 func (b *Badger) SetResultsEntry(searchterm string, result aur.Results) error {

@@ -3,19 +3,21 @@ package routes
 import (
 	"context"
 	"errors"
-	"github.com/finitum/AAAAA/pkg/executor"
-	"github.com/finitum/AAAAA/pkg/git"
-	"github.com/finitum/AAAAA/pkg/models"
-	"github.com/finitum/AAAAA/pkg/repo_add"
-	"github.com/finitum/AAAAA/pkg/store"
+	"io"
+	"net/http"
+	"os"
+
 	"github.com/go-chi/chi"
 	"github.com/go-chi/jwtauth"
 	"github.com/go-chi/render"
 	"github.com/go-git/go-git/v5/plumbing"
 	log "github.com/sirupsen/logrus"
-	"io"
-	"net/http"
-	"os"
+
+	"github.com/finitum/AAAAA/pkg/executor"
+	"github.com/finitum/AAAAA/pkg/git"
+	"github.com/finitum/AAAAA/pkg/models"
+	"github.com/finitum/AAAAA/pkg/repo_add"
+	"github.com/finitum/AAAAA/pkg/store"
 )
 
 func (rs *Routes) GetPackages(w http.ResponseWriter, r *http.Request) {
@@ -157,17 +159,17 @@ func (rs *Routes) UploadPackage(w http.ResponseWriter, r *http.Request) {
 	// Download file
 	pkgPath := rs.cfg.RepoLocation + "/" + filename
 	if externalUrl == "" {
-		file, err := os.Create(pkgPath)
-		if err != nil {
-			_ = render.Render(w, r, ErrServerError(err))
-			log.Warnf("UploadPackage creating file failed: %v", err)
+		file, createErr := os.Create(pkgPath)
+		if createErr != nil {
+			_ = render.Render(w, r, ErrServerError(createErr))
+			log.Warnf("UploadPackage creating file failed: %v", createErr)
 			return
 		}
 
 		// or fs.CopyStream if this returns ErrUnexpectedEof
-		if _, err := io.Copy(file, r.Body); err != nil {
-			_ = render.Render(w, r, ErrServerError(err))
-			log.Warnf("UploadPackage writing to file failed: %v", err)
+		if _, copyErr := io.Copy(file, r.Body); copyErr != nil {
+			_ = render.Render(w, r, ErrServerError(copyErr))
+			log.Warnf("UploadPackage writing to file failed: %v", copyErr)
 			return
 		}
 	} else {
@@ -175,9 +177,9 @@ func (rs *Routes) UploadPackage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	pkg.LastHash = plumbing.NewHash(hash)
-	if err := rs.db.AddPackage(pkg); err != nil {
-		_ = render.Render(w, r, ErrServerError(err))
-		log.Warnf("UploadPackage updating db failed: %v", err)
+	if addPackageErr := rs.db.AddPackage(pkg); addPackageErr != nil {
+		_ = render.Render(w, r, ErrServerError(addPackageErr))
+		log.Warnf("UploadPackage updating db failed: %v", addPackageErr)
 		return
 	}
 

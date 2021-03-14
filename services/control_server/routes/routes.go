@@ -1,11 +1,12 @@
 package routes
 
 import (
+	"net/http"
+
 	"github.com/finitum/AAAAA/pkg/auth"
 	"github.com/finitum/AAAAA/pkg/executor"
 	"github.com/finitum/AAAAA/pkg/store"
 	"github.com/finitum/AAAAA/services/control_server/config"
-	"net/http"
 )
 
 type Routes struct {
