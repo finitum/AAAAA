@@ -3,9 +3,10 @@ package aur
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
+
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
-	"net/http"
 )
 
 // NotInAurErr will be returned when the package is not found in the AUR, meaning this dependency

@@ -3,7 +3,15 @@ package main
 import (
 	"crypto/rand"
 	"encoding/base64"
+	"net/http"
+
 	"github.com/dgrijalva/jwt-go"
+	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/middleware"
+	"github.com/go-chi/jwtauth"
+	"github.com/go-chi/render"
+	log "github.com/sirupsen/logrus"
+
 	"github.com/finitum/AAAAA/internal/cors"
 	"github.com/finitum/AAAAA/pkg/auth"
 	"github.com/finitum/AAAAA/pkg/executor"
@@ -11,12 +19,6 @@ import (
 	"github.com/finitum/AAAAA/pkg/store"
 	"github.com/finitum/AAAAA/services/control_server/config"
 	"github.com/finitum/AAAAA/services/control_server/routes"
-	"github.com/go-chi/chi"
-	"github.com/go-chi/chi/middleware"
-	"github.com/go-chi/jwtauth"
-	"github.com/go-chi/render"
-	log "github.com/sirupsen/logrus"
-	"net/http"
 )
 
 func main() {
@@ -30,7 +32,11 @@ func main() {
 	if err != nil {
 		log.Fatalf("Opening Badger store failed: %v", err)
 	}
-	defer db.Close()
+	defer func() {
+		if dbErr := db.Close(); dbErr != nil {
+			log.Warnf("Error closing db: %v", dbErr)
+		}
+	}()
 
 	tokenAuth := jwtauth.New(jwt.SigningMethodHS384.Name, []byte(cfg.JWTKey), nil)
 
@@ -62,7 +68,7 @@ func main() {
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 	r.Use(cors.AllowAll)
-	//r.Use(middleware.Compress(5))
+	// r.Use(middleware.Compress(5))
 
 	r.Use(render.SetContentType(render.ContentTypeJSON))
 
@@ -78,7 +84,7 @@ func main() {
 
 		// Handle valid / invalid tokens.
 		r.Use(jwtauth.Authenticator)
-		//r.Use(corsHandler)
+		// r.Use(corsHandler)
 
 		r.Post("/user", rs.AddUser)
 		r.Delete("/user/{username}", rs.DeleteUser)

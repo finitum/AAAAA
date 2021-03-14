@@ -1,16 +1,16 @@
 package repo_add
 
 import (
-	"github.com/stretchr/testify/assert"
-	"golang.org/x/sys/unix"
 	"os"
 	"os/exec"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"golang.org/x/sys/unix"
 )
 
 func TestNewRepoAdd(t *testing.T) {
 	_, err := NewRepoAdd("test")
-
 	// If NewRepoAdd fails, the tests don't run on an arch system.
 	// By returning the test just passes on non Archlinux systems
 	if err != nil {
@@ -24,7 +24,6 @@ func TestIntegration(t *testing.T) {
 	pkgbuildpath := dir + "/PKGBUILD"
 
 	repo, err := NewRepoAdd(dbpath)
-
 	// If NewRepoAdd fails, the tests don't run on an arch system.
 	// By returning the test just passes on non Archlinux systems
 	if err != nil {
@@ -73,6 +72,6 @@ provides=('dummy=0.1')`)
 	// TODO: This test should actually assert things about the database
 	// 		 I did manually check it working, but that't not really enough is it :P
 
-	//err = os.RemoveAll(dir)
+	// err = os.RemoveAll(dir)
 	assert.NoError(t, err)
 }

@@ -2,15 +2,16 @@ package store
 
 import (
 	"github.com/dgraph-io/ristretto"
-	"github.com/finitum/AAAAA/pkg/aur"
 	"github.com/pkg/errors"
+
+	"github.com/finitum/AAAAA/pkg/aur"
 )
 
 type Ristretto struct {
 	cache *ristretto.Cache
 }
 
-// NewRistretto creates a new Cache based on ristretto
+// NewRistretto creates a new Cache based on ristretto.
 func NewRistretto() (*Ristretto, error) {
 	// TODO: these are sane defaults, we may want to make them configurable
 	cache, err := ristretto.NewCache(&ristretto.Config{

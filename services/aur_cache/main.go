@@ -2,16 +2,18 @@ package main
 
 import (
 	"context"
-	"github.com/finitum/AAAAA/internal/cors"
-	"github.com/finitum/AAAAA/pkg/aur"
-	"github.com/finitum/AAAAA/pkg/store"
+	"net/http"
+	"os"
+	"strings"
+
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/render"
 	log "github.com/sirupsen/logrus"
-	"net/http"
-	"os"
-	"strings"
+
+	"github.com/finitum/AAAAA/internal/cors"
+	"github.com/finitum/AAAAA/pkg/aur"
+	"github.com/finitum/AAAAA/pkg/store"
 )
 
 func init() {
@@ -46,7 +48,11 @@ func main() {
 		if err != nil {
 			log.Fatalf("Couldn't open ristretto cache: %v", err)
 		}
-		defer badger.Close()
+		defer func() {
+			if err := badger.Close(); err != nil {
+				log.Warnf("Error closing badger: %v", err)
+			}
+		}()
 		badger.StartGC(ctx)
 		cache = badger
 	}

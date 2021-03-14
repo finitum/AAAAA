@@ -2,15 +2,16 @@ package store
 
 import (
 	"context"
+	"time"
+
 	"github.com/dgraph-io/badger/v2"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
-	"time"
 )
 
 const gcTime = 5 * time.Minute
 
-// Badger is a Store based on dgraph's badger
+// Badger is a Store based on dgraph's badger.
 type Badger struct {
 	db *badger.DB
 }

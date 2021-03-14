@@ -3,6 +3,15 @@ name: Go
 on: [push]
 
 jobs:
+  lint:
+    name: Lint Golang
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: golangci-lint
+      uses: golangci/golangci-lint-action@v2
+      with:
+        version: latest
   build:
     name: Build
     runs-on: ubuntu-latest
@@ -17,9 +26,6 @@ jobs:
 
     - name: Get dependencies
       run: go mod download
-
-    - name: Vet
-      run: go vet -v ./...
 
     - name: Build
       run: go build -v ./...

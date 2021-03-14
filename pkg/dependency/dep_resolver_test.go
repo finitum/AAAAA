@@ -3,11 +3,13 @@ package dependency
 import (
 	"errors"
 	"fmt"
-	"github.com/finitum/AAAAA/pkg/aur"
-	"github.com/stretchr/testify/assert"
 	"sort"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
+
+	"github.com/finitum/AAAAA/pkg/aur"
 )
 
 func testInfoResolver(_, pkg string) (aur.InfoResult, error) {

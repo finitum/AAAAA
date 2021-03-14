@@ -3,13 +3,17 @@
 package repo_add
 
 import (
-	"github.com/finitum/AAAAA/internal/cmdutil"
-	"github.com/pkg/errors"
 	"os/exec"
+
+	"github.com/pkg/errors"
+
+	"github.com/finitum/AAAAA/internal/cmdutil"
 )
 
-const repoAddCommand string = "repo-add"
-const repoRemoveCommand string = "repo-remove"
+const (
+	repoAddCommand    string = "repo-add"
+	repoRemoveCommand string = "repo-remove"
+)
 
 // CommonOptions are options that are common to the repo-add and repo-remove commands.
 // Derived from https://www.archlinux.org/pacman/repo-add.8.html

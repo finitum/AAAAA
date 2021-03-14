@@ -1,12 +1,14 @@
 package store
 
 import (
-	"github.com/finitum/AAAAA/pkg/models"
-	"github.com/go-git/go-git/v5/plumbing"
-	"github.com/stretchr/testify/assert"
 	"os"
 	"testing"
 	"time"
+
+	"github.com/go-git/go-git/v5/plumbing"
+	"github.com/stretchr/testify/assert"
+
+	"github.com/finitum/AAAAA/pkg/models"
 )
 
 func TestBadger_AddGetDelPackage(t *testing.T) {

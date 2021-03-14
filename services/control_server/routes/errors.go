@@ -1,8 +1,9 @@
 package routes
 
 import (
-	"github.com/go-chi/render"
 	"net/http"
+
+	"github.com/go-chi/render"
 )
 
 type AppCode int64

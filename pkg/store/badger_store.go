@@ -3,9 +3,11 @@ package store
 import (
 	"bytes"
 	"encoding/gob"
+
 	"github.com/dgraph-io/badger/v2"
-	"github.com/finitum/AAAAA/pkg/models"
 	"github.com/pkg/errors"
+
+	"github.com/finitum/AAAAA/pkg/models"
 )
 
 func (b *Badger) GetPackage(name string) (*models.Pkg, error) {
@@ -139,7 +141,6 @@ func (b *Badger) AllUsers() (users []*models.User, _ error) {
 				users = append(users, &user)
 				return nil
 			})
-
 			if err != nil {
 				return errors.Wrap(err, "value")
 			}

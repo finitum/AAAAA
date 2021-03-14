@@ -2,15 +2,16 @@ package cmdutil
 
 import (
 	"fmt"
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestRunCommandStdout(t *testing.T) {
 	stdout, _, err := RunCommand("/bin/bash", "-c", "builtin echo hello")
 	assert.NoError(t, err)
 	assert.Equal(t, "hello\n", stdout)
-	//assert.Empty(t, stderr)
+	// assert.Empty(t, stderr)
 }
 
 func TestRunCommandStdErr(t *testing.T) {

@@ -27,8 +27,9 @@ Basic example:
 package dependency
 
 import (
-	"github.com/finitum/AAAAA/pkg/aur"
 	"github.com/pkg/errors"
+
+	"github.com/finitum/AAAAA/pkg/aur"
 )
 
 // Dependency represents a dependency of an AUR package.
@@ -97,7 +98,6 @@ func (r *aurResolver) resolveInternal(pkg string) error {
 	// Go through all dependencies
 	for _, dep := range deps {
 		if _, exists := r.deps[dep]; !exists {
-
 			if err := r.resolveInternal(dep); err != nil {
 				return errors.Wrapf(err, "failed to resolve dependency %s", dep)
 			}

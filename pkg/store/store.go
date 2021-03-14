@@ -1,17 +1,19 @@
 package store
 
 import (
+	"time"
+
+	"github.com/pkg/errors"
+
 	"github.com/finitum/AAAAA/pkg/aur"
 	"github.com/finitum/AAAAA/pkg/models"
-	"github.com/pkg/errors"
-	"time"
 )
 
 // ErrNotExists is the error returned by the Store or Cache if an entry can not be found, this is useful because it
 // isn't always considered an error if no entry exists.
 var ErrNotExists = errors.New("entry does not exist")
 
-// Store is a combined interface of PackageStore and UserStore, this is the store the control_plane needs
+// Store is a combined interface of PackageStore and UserStore, this is the store the control_plane needs.
 type Store interface {
 	PackageStore
 	UserStore
@@ -47,12 +49,14 @@ type UserStore interface {
 	AllUserNames() ([]string, error)
 }
 
-// cacheTTL is the TTL of cache entries
-const cacheTTL = 30 * time.Minute
-const resultsPrefix = "results_"
-const infoPrefix = "info_"
+// cacheTTL is the TTL of cache entries.
+const (
+	cacheTTL      = 30 * time.Minute
+	resultsPrefix = "results_"
+	infoPrefix    = "info_"
+)
 
-// Cache interface for caching aur rpc results
+// Cache interface for caching aur rpc results.
 type Cache interface {
 	// SetResultsEntry, add an aur result cache entry
 	SetResultsEntry(term string, result aur.Results) error
@@ -68,7 +72,7 @@ type Cache interface {
 	GetInfoEntry(name string) (*aur.InfoResult, error)
 }
 
-// GetPartialCacheEntry gets a cache entry even if the term only partially matches the prefix
+// GetPartialCacheEntry gets a cache entry even if the term only partially matches the prefix.
 func GetPartialCacheEntry(cache Cache, term string) (aur.Results, bool, error) {
 	exact := true
 
