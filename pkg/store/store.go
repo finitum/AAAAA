@@ -90,3 +90,33 @@ func GetPartialCacheEntry(cache Cache, term string) (aur.Results, bool, error) {
 
 	return nil, false, ErrNotExists
 }
+
+const jobPrefix = "job_"
+
+// Keep job logs for 10 days
+const jobTTL = 10 * 24 * time.Hour
+
+type JobStore interface {
+	// NewJob creates a new job. It returns the newly created job, with in it the
+	// uuid of the job which can be used for further lookup.
+	NewJob(name string) (*models.Job, error)
+
+	// AppendToJobLog appends a line to a job's log
+	AppendToJobLog(uuid string, l *models.LogLine) error
+
+	// SetJobStatus updates the status of this job
+	SetJobStatus(uuid string, status models.BuildStatus) error
+
+	// GetLogs returns the entire log of this job
+	GetLogs(uuid string) ([]models.LogLine, error)
+
+	// GetJobs returns all jobs
+	GetJobs() ([]models.Job, error)
+
+	// AddLogListener takes a function which will be called every time a new logline is
+	// added the job targeted with the uuid
+	AddLogListener(uuid string, cb func(line *models.LogLine))
+
+	// GetJob gets a job by uuid
+	GetJob(uuid string) (*models.Job, error)
+}

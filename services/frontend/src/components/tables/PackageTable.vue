@@ -59,9 +59,9 @@
 import { defineComponent, ref } from "vue";
 import { frequencyToDuration, Package } from "@/api/Models";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
-import UpdatePackage from "@/components/UpdatePackage.vue";
+import UpdatePackage from "@/components/modals/UpdatePackage.vue";
 import { DeletePackage, loggedIn } from "@/api/API";
-import Dialog from "@/components/Dialog.vue";
+import Dialog from "@/components/modals/Dialog.vue";
 import { loadPackages, packages } from "@/api/packages";
 
 export default defineComponent({

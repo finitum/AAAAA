@@ -1,5 +1,5 @@
 import axios from "axios";
-import { notificationState } from "@/components/NotificationState";
+import { notificationState } from "@/components/modals/NotificationState";
 import { NewPackage, Package } from "@/api/Models";
 
 export interface Result {

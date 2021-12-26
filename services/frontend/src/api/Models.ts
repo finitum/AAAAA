@@ -31,3 +31,57 @@ export interface User {
   Username: string;
   Password: string;
 }
+
+export interface Job {
+  PackageName: string;
+  Status: BuildStatus;
+  Logs: LogLine[];
+  Uuid: string;
+  Time: number;
+}
+
+export enum BuildStatus {
+  Pending,
+  PullingRepo,
+  Running,
+  Uploading,
+  Done,
+
+  Errored
+}
+
+export function BuildStatusToString(status: BuildStatus): string {
+  switch (status) {
+    case BuildStatus.Pending:
+      return "Queued";
+    case BuildStatus.PullingRepo:
+      return "Pulling repository";
+    case BuildStatus.Running:
+      return "Running";
+    case BuildStatus.Uploading:
+      return "Uploading";
+    case BuildStatus.Done:
+      return "Done";
+    case BuildStatus.Errored:
+      return "Errored";
+
+    default:
+      return "Unknown";
+  }
+}
+
+export enum LogLevel {
+  PanicLevel,
+  FatalLevel,
+  ErrorLevel,
+  WarnLevel,
+  InfoLevel,
+  DebugLevel,
+  TraceLevel
+}
+
+export interface LogLine {
+  Time: number;
+  Level: LogLevel;
+  message: string;
+}

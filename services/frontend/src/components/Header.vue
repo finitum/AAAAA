@@ -26,6 +26,17 @@
       >
         <span class="button">Users</span>
       </div>
+      <div
+        class="cursor-pointer flex flex-col items-center justify-center h-full"
+        @click="router.push('/jobs')"
+        v-bind:class="[
+          router.currentRoute.value.path !== '/jobs'
+            ? 'bg-primary'
+            : 'bg-primarylight'
+        ]"
+      >
+        <span class="button">Jobs</span>
+      </div>
 
       <div
         class="bg-primary cursor-pointer flex flex-col items-center justify-center h-full"
